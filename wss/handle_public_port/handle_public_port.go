@@ -6,6 +6,7 @@ import (
 	"net/http"
 	"net/http/httputil"
 	"net/url"
+	"strings"
 
 	"github.com/gorilla/mux"
 )
@@ -84,9 +85,18 @@ func GetProxy(id string) (*httputil.ReverseProxy, bool) {
 	originalDirector := reverseProxy.Director
 	reverseProxy.Director = func(req *http.Request) {
 		originalDirector(req)
+		req.URL.Scheme = targetURL.Scheme
+		req.URL.Host = targetURL.Host
+		req.Host = targetURL.Host
+
+		// Preserve WebSocket headers
+		if strings.ToLower(req.Header.Get("Connection")) == "upgrade" &&
+			strings.ToLower(req.Header.Get("Upgrade")) == "websocket" {
+			req.Header.Set("Connection", "upgrade")
+			req.Header.Set("Upgrade", "websocket")
+		}
 		req.Header.Set("X-Forwarded-For", "")
 		req.Header.Set("X-Real-IP", "")
-		req.Host = targetURL.Host
 	}
 	proxy_cache[id] = reverseProxy
 
