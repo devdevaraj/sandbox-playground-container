@@ -81,7 +81,6 @@ func GetProxy(id string) (*httputil.ReverseProxy, bool) {
 		return nil, false
 	}
 	reverseProxy := httputil.NewSingleHostReverseProxy(targetURL)
-	log.Printf(targetURL.String())
 	originalDirector := reverseProxy.Director
 	reverseProxy.Director = func(req *http.Request) {
 		originalDirector(req)
@@ -92,6 +91,7 @@ func GetProxy(id string) (*httputil.ReverseProxy, bool) {
 		// Preserve WebSocket headers
 		if strings.ToLower(req.Header.Get("Connection")) == "upgrade" &&
 			strings.ToLower(req.Header.Get("Upgrade")) == "websocket" {
+			log.Printf("Web socket")
 			req.Header.Set("Connection", "upgrade")
 			req.Header.Set("Upgrade", "websocket")
 		}
