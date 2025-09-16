@@ -81,7 +81,7 @@ func GetProxy(id string) (*httputil.ReverseProxy, bool) {
 		return nil, false
 	}
 	reverseProxy := httputil.NewSingleHostReverseProxy(targetURL)
-	log.Printf(targetURL.Host)
+	log.Printf(targetURL.String())
 	originalDirector := reverseProxy.Director
 	reverseProxy.Director = func(req *http.Request) {
 		originalDirector(req)
