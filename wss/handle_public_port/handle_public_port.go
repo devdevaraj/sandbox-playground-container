@@ -88,10 +88,11 @@ func GetProxy(id string) (*httputil.ReverseProxy, bool) {
 		req.URL.Host = targetURL.Host
 		req.Host = targetURL.Host
 
+		log.Printf("Web socket out")
 		// Preserve WebSocket headers
 		if strings.ToLower(req.Header.Get("Connection")) == "upgrade" &&
 			strings.ToLower(req.Header.Get("Upgrade")) == "websocket" {
-			log.Printf("Web socket")
+			log.Printf("Web socket in")
 			req.Header.Set("Connection", "upgrade")
 			req.Header.Set("Upgrade", "websocket")
 		}
