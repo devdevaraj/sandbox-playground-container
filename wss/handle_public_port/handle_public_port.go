@@ -2,12 +2,9 @@ package handle_public_port
 
 import (
 	"encoding/json"
-	"log"
 	"net/http"
-	"net/http/httputil"
-	"net/url"
-	"strings"
 
+	http_ws_proxy "github.com/devdevaraj/wss/http_ws_proxy"
 	"github.com/gorilla/mux"
 )
 
@@ -20,7 +17,7 @@ var target_cache = map[string]string{
 	"vm1p80": "172.16.0.2:80",
 }
 
-var proxy_cache = map[string]*httputil.ReverseProxy{}
+var proxy_cache = map[string]*http_ws_proxy.HTTPWSProxy{}
 
 func HandlePublicPort(w http.ResponseWriter, r *http.Request) {
 	if r.Method == "POST" {
@@ -64,7 +61,7 @@ func HandlePublicPort(w http.ResponseWriter, r *http.Request) {
 	w.Write([]byte("Not found"))
 }
 
-func GetProxy(id string) (*httputil.ReverseProxy, bool) {
+func GetProxy(id string) (*http_ws_proxy.HTTPWSProxy, bool) {
 	target, ok := target_cache[id]
 	if !ok || target == "" {
 		return nil, false
@@ -75,30 +72,29 @@ func GetProxy(id string) (*httputil.ReverseProxy, bool) {
 		return cachedProxy, true
 	}
 
-	targetURL, err := url.Parse("http://" + target)
-	if err != nil {
-		log.Fatal("Error parsing target URL: ", err)
-		return nil, false
-	}
-	reverseProxy := httputil.NewSingleHostReverseProxy(targetURL)
-	originalDirector := reverseProxy.Director
-	reverseProxy.Director = func(req *http.Request) {
-		log.Printf("Web socket out")
-		originalDirector(req)
-		req.URL.Scheme = targetURL.Scheme
-		req.URL.Host = targetURL.Host
-		req.Host = targetURL.Host
+	reverseProxy := http_ws_proxy.NewHTTPWSProxy(target)
 
-		// Preserve WebSocket headers
-		if strings.ToLower(req.Header.Get("Connection")) == "upgrade" &&
-			strings.ToLower(req.Header.Get("Upgrade")) == "websocket" {
-			log.Printf("Web socket in")
-			req.Header.Set("Connection", "upgrade")
-			req.Header.Set("Upgrade", "websocket")
-		}
-		req.Header.Set("X-Forwarded-For", "")
-		req.Header.Set("X-Real-IP", "")
-	}
+	// targetURL, err := url.Parse("http://" + target)
+	// if err != nil {
+	// 	log.Fatal("Error parsing target URL: ", err)
+	// 	return nil, false
+	// }
+	// reverseProxy := httputil.NewSingleHostReverseProxy(targetURL)
+	// reverseProxy.Director = func(req *http.Request) {
+	// 	req.URL.Scheme = targetURL.Scheme
+	// 	req.URL.Host = targetURL.Host
+	// 	req.Host = targetURL.Host
+
+	// 	// Preserve WebSocket headers
+	// 	if strings.ToLower(req.Header.Get("Connection")) == "upgrade" &&
+	// 		strings.ToLower(req.Header.Get("Upgrade")) == "websocket" {
+	// 		log.Printf("Web socket in")
+	// 		req.Header.Set("Connection", "upgrade")
+	// 		req.Header.Set("Upgrade", "websocket")
+	// 	}
+	// 	req.Header.Set("X-Forwarded-For", "")
+	// 	req.Header.Set("X-Real-IP", "")
+	// }
 	proxy_cache[id] = reverseProxy
 
 	return reverseProxy, true

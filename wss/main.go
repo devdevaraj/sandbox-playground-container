@@ -71,7 +71,7 @@ func main() {
 
 		reverseProxy, ok := handle_public_port.GetProxy(id)
 		if ok {
-			reverseProxy.ServeHTTP(w, r)
+			reverseProxy.ProxyHandler(w, r)
 			return
 		}
 		w.WriteHeader(http.StatusBadGateway)
