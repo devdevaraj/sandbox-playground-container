@@ -14,7 +14,7 @@ type PortID struct {
 }
 
 var target_cache = map[string]string{
-	"codeserverprt": "172.16.0.2:50061",
+	"codeserverprt": "172.16.0.2:40000",
 }
 
 var proxy_cache = map[string]*http_ws_proxy.HTTPWSProxy{}
