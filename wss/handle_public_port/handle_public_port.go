@@ -14,7 +14,7 @@ type PortID struct {
 }
 
 var target_cache = map[string]string{
-	"vm1p80": "172.16.0.2:80",
+	"codeserverprt": "172.16.0.2:50061",
 }
 
 var proxy_cache = map[string]*http_ws_proxy.HTTPWSProxy{}
@@ -46,15 +46,17 @@ func HandlePublicPort(w http.ResponseWriter, r *http.Request) {
 		id, ok := vars["id"]
 		w.Header().Set("Content-Type", "application/json")
 		w.WriteHeader(http.StatusOK)
+		temp_list := target_cache
+		delete(temp_list, "codeserverprt")
 		if ok {
 			data := PortID{
 				Key:    id,
-				Target: target_cache[id],
+				Target: temp_list[id],
 			}
 			json.NewEncoder(w).Encode(data)
 			return
 		}
-		json.NewEncoder(w).Encode(target_cache)
+		json.NewEncoder(w).Encode(temp_list)
 		return
 	}
 	w.WriteHeader(http.StatusNotFound)
