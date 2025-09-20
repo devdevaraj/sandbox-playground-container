@@ -74,6 +74,7 @@ func StartMicroVM(
 		MachineCfg: models.MachineConfiguration{
 			VcpuCount:  firecracker.Int64(int64(cpuCount)),
 			MemSizeMib: firecracker.Int64(int64(ramSize)),
+			Smt:        firecracker.Bool(true),
 		},
 		NetworkInterfaces: []firecracker.NetworkInterface{
 			create_ni.CreateNetworkInterface(tapName, ipAddr, gateway, macAddr),
