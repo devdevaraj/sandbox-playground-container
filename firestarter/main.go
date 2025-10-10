@@ -12,11 +12,14 @@ import (
 )
 
 type Template struct {
-	CPU        *int   `json:"cpu,omitempty"`
-	Multiplier *int   `json:"multiplier,omitempty"`
-	RAM        *int   `json:"ram,omitempty"`
-	Kernel     string `json:"kernel"`
-	RootFS     string `json:"rootfs"`
+	CPU           *int   `json:"cpu,omitempty"`
+	SMT           *bool  `json:"smt,omitempty"`
+	Multiplier    *int   `json:"multiplier,omitempty"`
+	RAM           *int   `json:"ram,omitempty"`
+	EnableOverlay *bool  `json:"enable-overlay"`
+	KernelArgs    string `json:"kernel-args"`
+	Kernel        string `json:"kernel"`
+	RootFS        string `json:"rootfs"`
 }
 
 type Config struct {
@@ -47,10 +50,13 @@ func main() {
 			"172.16.0."+strconv.Itoa(i+2),
 			"172.16.0.1",
 			"AA:FC:00:00:00:0"+strconv.Itoa(i+1),
+			cfg.Templates[i].KernelArgs,
 			cfg.Templates[i].Kernel,
 			cfg.Templates[i].RootFS,
 			cfg.Templates[i].CPU,
+			cfg.Templates[i].SMT,
 			cfg.Templates[i].RAM,
+			cfg.Templates[i].EnableOverlay,
 		)
 	}
 	select {}

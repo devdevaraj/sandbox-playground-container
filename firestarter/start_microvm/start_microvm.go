@@ -19,10 +19,13 @@ func StartMicroVM(
 	ipAddr,
 	gateway,
 	macAddr string,
+	kernelArgs string,
 	kernelImagePath string,
 	rootfsPath string,
 	cpu *int,
+	smt *bool,
 	ram *int,
+	enableOverlay *bool,
 ) {
 	// Configure VM
 	overlayfsPath := "/root/firecracker/overlayfs/" + vmID + "-overlay.ext4"
@@ -48,33 +51,41 @@ func StartMicroVM(
 
 	cpuCount := defaultInt(cpu, 2)
 	ramSize := defaultInt(ram, 2048)
+	kernelArgsString := defaultString(&kernelArgs, "console=ttyS0 reboot=k panic=1 pci=off hostname="+vmID+" overlay_root=vdb init=/sbin/overlay-init")
+	smtFlag := defaultBool(smt, false)
+	overlay := defaultBool(enableOverlay, false)
 
 	cfg := firecracker.Config{
 		SocketPath:      socketPath,
 		KernelImagePath: kernelImagePath,
-		KernelArgs:      "console=ttyS0 reboot=k panic=1 pci=off hostname=" + vmID + " overlay_root=vdb init=/sbin/overlay-init",
-		Drives: []models.Drive{
-			{
-				DriveID:      firecracker.String("rootfs"),
-				PathOnHost:   firecracker.String(rootfsPath),
-				CacheType:    firecracker.String(models.DriveCacheTypeUnsafe),
-				IsRootDevice: firecracker.Bool(true),
-				IsReadOnly:   firecracker.Bool(true),
-				RateLimiter:  nil,
-			},
-			{
-				DriveID:      firecracker.String("overlayfs"),
-				PathOnHost:   firecracker.String(overlayfsPath),
-				CacheType:    firecracker.String(models.DriveCacheTypeUnsafe),
-				IsRootDevice: firecracker.Bool(false),
-				IsReadOnly:   firecracker.Bool(false),
-				RateLimiter:  nil,
-			},
-		},
+		KernelArgs:      kernelArgsString,
+		Drives: func() []models.Drive {
+			drives := []models.Drive{
+				{
+					DriveID:      firecracker.String("rootfs"),
+					PathOnHost:   firecracker.String(rootfsPath),
+					CacheType:    firecracker.String(models.DriveCacheTypeUnsafe),
+					IsRootDevice: firecracker.Bool(true),
+					IsReadOnly:   firecracker.Bool(overlay),
+					RateLimiter:  nil,
+				},
+			}
+			if overlay {
+				drives = append(drives, models.Drive{
+					DriveID:      firecracker.String("overlayfs"),
+					PathOnHost:   firecracker.String(overlayfsPath),
+					CacheType:    firecracker.String(models.DriveCacheTypeUnsafe),
+					IsRootDevice: firecracker.Bool(false),
+					IsReadOnly:   firecracker.Bool(false),
+					RateLimiter:  nil,
+				})
+			}
+			return drives
+		}(),
 		MachineCfg: models.MachineConfiguration{
 			VcpuCount:  firecracker.Int64(int64(cpuCount)),
 			MemSizeMib: firecracker.Int64(int64(ramSize)),
-			Smt:        firecracker.Bool(true),
+			Smt:        firecracker.Bool(smtFlag),
 		},
 		NetworkInterfaces: []firecracker.NetworkInterface{
 			create_ni.CreateNetworkInterface(tapName, ipAddr, gateway, macAddr),
@@ -108,6 +119,20 @@ func StartMicroVM(
 }
 
 func defaultInt(ptr *int, defaultVal int) int {
+	if ptr != nil {
+		return *ptr
+	}
+	return defaultVal
+}
+
+func defaultString(ptr *string, defaultVal string) string {
+	if ptr != nil && *ptr != "" {
+		return *ptr
+	}
+	return defaultVal
+}
+
+func defaultBool(ptr *bool, defaultVal bool) bool {
 	if ptr != nil {
 		return *ptr
 	}

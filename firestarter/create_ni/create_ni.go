@@ -1,12 +1,14 @@
 package create_ni
 
 import (
+	"fmt"
 	"net"
 
 	"github.com/firecracker-microvm/firecracker-go-sdk"
 )
 
 func CreateNetworkInterface(tapName, ipAddr, gateway, macAddr string) firecracker.NetworkInterface {
+	fmt.Printf(tapName + ipAddr + gateway + macAddr)
 	return firecracker.NetworkInterface{
 		StaticConfiguration: &firecracker.StaticNetworkConfiguration{
 			HostDevName: tapName,

@@ -1,8 +1,8 @@
-#!/bin/sh
+#!/bin/bash
 
 json_file="/resourses/.configs/$1.json"
 
-number=$(jq -r '.vms // error("field \"vms\" missing or null")' "$json_file")
+number=$(jq -r '.templates | length' "$json_file")
 
 SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
 
@@ -10,17 +10,15 @@ EXECUTABLE="$SCRIPT_DIR/firestarter"
 WSS_EXECUTABLE="$SCRIPT_DIR/ws-server"
 FS_DIR="/root/firecracker/overlayfs"
 
-current_time=$(date +"%H:%M:%S")
-echo "The current time is: $current_time"
-
 mkdir -p "$FS_DIR"
-for  i in $(seq 1 "$number"); do
-dd if=/dev/zero of="$FS_DIR/vm$i-overlay.ext4" conv=sparse bs=1M count=40960 && mkfs.ext4 "$FS_DIR/vm$i-overlay.ext4"
-# dd if=/dev/zero of="$FS_DIR/vm$i-overlay.ext4" conv=sparse bs=1M count=40960
+for  i in $(seq 0 $((number - 1))); do
+ enableOverlay=$(jq -r ".templates[$i][\"enable-overlay\"]" "$json_file")
+ if [[ $enableOverlay == "true" ]]; then
+  overlaySize=$(jq -r ".templates[$i][\"overlay-size\"]" "$json_file")
+  vm_number=$((i + 1))
+  dd if=/dev/zero of="$FS_DIR/vm$vm_number-overlay.ext4" conv=sparse bs=1M count=$overlaySize && mkfs.ext4 "$FS_DIR/vm$vm_number-overlay.ext4"
+ fi
 done
-
-current_time=$(date +"%H:%M:%S")
-echo "The current time is: $current_time"
 
 "$WSS_EXECUTABLE" "$1" &
 
