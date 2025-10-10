@@ -22,7 +22,7 @@ done
 
 "$WSS_EXECUTABLE" "$1" &
 
-until "$EXECUTABLE" "$1"; do
+until "$EXECUTABLE" "$1" "/resourses/zfs/vmpool/vm1/rootfs_master.ext4"; do
   echo "Command failed. Retrying in 1 seconds..."
   sleep 1
 done

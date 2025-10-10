@@ -26,6 +26,8 @@ func StartMicroVM(
 	smt *bool,
 	ram *int,
 	enableOverlay *bool,
+	isZFS *bool,
+	ZFSPath string,
 ) {
 	// Configure VM
 	overlayfsPath := "/root/firecracker/overlayfs/" + vmID + "-overlay.ext4"
@@ -54,6 +56,12 @@ func StartMicroVM(
 	kernelArgsString := defaultString(&kernelArgs, "console=ttyS0 reboot=k panic=1 pci=off hostname="+vmID+" overlay_root=vdb init=/sbin/overlay-init")
 	smtFlag := defaultBool(smt, false)
 	overlay := defaultBool(enableOverlay, false)
+	zfs := defaultBool(isZFS, false)
+
+	path := rootfsPath
+	if zfs {
+		path = ZFSPath
+	}
 
 	cfg := firecracker.Config{
 		SocketPath:      socketPath,
@@ -63,7 +71,7 @@ func StartMicroVM(
 			drives := []models.Drive{
 				{
 					DriveID:      firecracker.String("rootfs"),
-					PathOnHost:   firecracker.String(rootfsPath),
+					PathOnHost:   firecracker.String(path),
 					CacheType:    firecracker.String(models.DriveCacheTypeUnsafe),
 					IsRootDevice: firecracker.Bool(true),
 					IsReadOnly:   firecracker.Bool(overlay),

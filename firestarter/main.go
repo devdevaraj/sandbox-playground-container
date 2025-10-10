@@ -17,6 +17,7 @@ type Template struct {
 	Multiplier    *int   `json:"multiplier,omitempty"`
 	RAM           *int   `json:"ram,omitempty"`
 	EnableOverlay *bool  `json:"enable-overlay"`
+	IsZFS         *bool  `json:"is-zfs"`
 	KernelArgs    string `json:"kernel-args"`
 	Kernel        string `json:"kernel"`
 	RootFS        string `json:"rootfs"`
@@ -57,6 +58,8 @@ func main() {
 			cfg.Templates[i].SMT,
 			cfg.Templates[i].RAM,
 			cfg.Templates[i].EnableOverlay,
+			cfg.Templates[i].IsZFS,
+			args[2],
 		)
 	}
 	select {}
