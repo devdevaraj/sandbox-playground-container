@@ -1,5 +1,7 @@
 #!/bin/bash
 
+echo "$2"
+
 json_file="/resourses/.configs/$1.json"
 
 number=$(jq -r '.templates | length' "$json_file")
@@ -22,7 +24,7 @@ done
 
 "$WSS_EXECUTABLE" "$1" &
 
-until "$EXECUTABLE" "$1" "/resourses/zfs/vmpool/vm1/rootfs_master.ext4"; do
+until "$EXECUTABLE" "$1" "/resourses/zfs/$2/rootfs_master.ext4"; do
   echo "Command failed. Retrying in 1 seconds..."
   sleep 1
 done
