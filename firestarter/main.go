@@ -59,7 +59,7 @@ func main() {
 			cfg.Templates[i].RAM,
 			cfg.Templates[i].EnableOverlay,
 			cfg.Templates[i].IsZFS,
-			args[2],
+			args[2]+"-vm"+strconv.Itoa(i+1),
 		)
 	}
 	select {}
