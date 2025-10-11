@@ -59,7 +59,7 @@ func main() {
 			cfg.Templates[i].RAM,
 			cfg.Templates[i].EnableOverlay,
 			cfg.Templates[i].IsZFS,
-			args[2]+"-vm"+strconv.Itoa(i+1),
+			"/resourses/zfs/"+args[2]+"-vm"+strconv.Itoa(i+1)+"/rootfs_master.ext4",
 		)
 	}
 	select {}

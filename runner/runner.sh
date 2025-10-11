@@ -24,7 +24,7 @@ done
 
 "$WSS_EXECUTABLE" "$1" &
 
-until "$EXECUTABLE" "$1" "/resourses/zfs/$2/rootfs_master.ext4"; do
+until "$EXECUTABLE" "$1" "$2"; do
   echo "Command failed. Retrying in 1 seconds..."
   sleep 1
 done
