@@ -18,6 +18,8 @@ type Template struct {
 	RAM           *int   `json:"ram,omitempty"`
 	EnableOverlay *bool  `json:"enable-overlay"`
 	IsZFS         *bool  `json:"is-zfs"`
+	ZFSSnapshot   string `json:"zfs-snapshot"`
+	ZFSClonePath  string `json:"zfs-clone-path"`
 	KernelArgs    string `json:"kernel-args"`
 	Kernel        string `json:"kernel"`
 	RootFS        string `json:"rootfs"`
@@ -59,7 +61,7 @@ func main() {
 			cfg.Templates[i].RAM,
 			cfg.Templates[i].EnableOverlay,
 			cfg.Templates[i].IsZFS,
-			"/resourses/zfs/"+args[2]+"-vm"+strconv.Itoa(i+1)+"/rootfs_master.ext4",
+			cfg.Templates[i].ZFSClonePath+args[2]+"-vm"+strconv.Itoa(i+1)+"/rootfs.ext4",
 		)
 	}
 	select {}
