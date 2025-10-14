@@ -133,7 +133,7 @@ func HandleWebsocket(w http.ResponseWriter, r *http.Request, ip string, VMID str
 
 	// Configure SSH client
 	config := &ssh.ClientConfig{
-		User: "root",
+		User: "nomad",
 		Auth: []ssh.AuthMethod{
 			ssh.PublicKeys(signer),
 		},
