@@ -1,7 +1,5 @@
 #!/bin/bash
 
-echo "$2"
-
 json_file="/resourses/.configs/$1.json"
 
 number=$(jq -r '.templates | length' "$json_file")
