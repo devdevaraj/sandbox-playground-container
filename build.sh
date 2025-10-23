@@ -2,7 +2,8 @@
 
 IMAGE=${1:-"repo.synnefo.solutions/devaraj/playground"}
 
-(cd ./firestarter && go build .)
-(cd ./wss && go build .)
+(cd ./new_firestarter && go build .)
+# (cd ./firestarter && go build .)
+# (cd ./wss && go build .)
 
-docker build -t $IMAGE .
+sudo docker build -t $IMAGE .

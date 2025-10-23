@@ -1,4 +1,4 @@
-package handle_websocket
+package wsserver
 
 import (
 	"encoding/json"
@@ -10,6 +10,7 @@ import (
 	"sync"
 	"time"
 
+	"github.com/devdevaraj/firestarter/init_app"
 	"github.com/gorilla/mux"
 	"github.com/gorilla/websocket"
 	"golang.org/x/crypto/ssh"
@@ -40,7 +41,7 @@ type ResizeMessage struct {
 	Rows int    `json:"rows"`
 }
 
-var upgrader = websocket.Upgrader{
+var ws_upgrader = websocket.Upgrader{
 	ReadBufferSize:  1024,
 	WriteBufferSize: 1024,
 	CheckOrigin: func(r *http.Request) bool {
@@ -104,11 +105,11 @@ func fetchOrCreateSession(sessionID, ip string, config *ssh.ClientConfig) (*wsSe
 	return wsSess, nil
 }
 
-func HandleWebsocket(w http.ResponseWriter, r *http.Request, ip string, VMID string) {
+func HandleWebsocket(w http.ResponseWriter, r *http.Request, ip string, VMID string, template init_app.Template) {
 	vars := mux.Vars(r)
 	sessionid := vars["session"]
 	// Upgrade HTTP connection to WebSocket
-	ws, err := upgrader.Upgrade(w, r, nil)
+	ws, err := ws_upgrader.Upgrade(w, r, nil)
 	if err != nil {
 		log.Printf("WebSocket upgrade error: %v", err)
 		return
@@ -133,7 +134,7 @@ func HandleWebsocket(w http.ResponseWriter, r *http.Request, ip string, VMID str
 
 	// Configure SSH client
 	config := &ssh.ClientConfig{
-		User: "nomad",
+		User: *template.Username,
 		Auth: []ssh.AuthMethod{
 			ssh.PublicKeys(signer),
 		},

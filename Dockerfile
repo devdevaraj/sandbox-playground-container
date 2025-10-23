@@ -38,13 +38,15 @@ RUN chmod 666 /dev/kvm || true
 RUN mkdir -p /root/firecracker/keys
 COPY ./keys/id_rsa /root/firecracker/keys/ubuntu-24.04.id_rsa
 
-COPY ./firestarter/firestarter /root/firecracker/firestarter
-COPY ./wss/wss /root/firecracker/ws-server
+COPY ./new_firestarter/firestarter /root/firecracker/firestarter
+# COPY ./firestarter/firestarter /root/firecracker/firestarter
+# COPY ./wss/wss /root/firecracker/ws-server
 
-COPY ./runner/runner.sh /root/firecracker/runner.sh
-RUN chmod +x /root/firecracker/runner.sh
+# COPY ./runner/runner.sh /root/firecracker/runner.sh
+# RUN chmod +x /root/firecracker/runner.sh
 
 WORKDIR /root/firecracker
 
-ENTRYPOINT ["/root/firecracker/runner.sh"]
+ENTRYPOINT ["/root/firecracker/firestarter"]
+# ENTRYPOINT ["/root/firecracker/runner.sh"]
 CMD ["ubuntu2404n1"]

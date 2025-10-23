@@ -1,4 +1,4 @@
-package http_ws_proxy
+package wsserver
 
 import (
 	"log"
