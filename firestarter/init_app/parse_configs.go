@@ -89,7 +89,7 @@ func ParseConfigs(file string) Config {
 		if len(cfg.Templates[i].Network) == 0 {
 			cfg.Templates[i].Network = []Network{
 				{
-					Name: "enth0",
+					Name: "eth0",
 					TAP:  "tap" + strconv.Itoa(i),
 					IP:   "172.16.0." + strconv.Itoa(i+2),
 					MAC:  "AA:FC:00:00:00:0" + strconv.Itoa(i+1)},
