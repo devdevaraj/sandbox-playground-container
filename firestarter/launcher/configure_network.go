@@ -9,20 +9,20 @@ import (
 
 func ConfigureNetWork(cfg init_app.Config) {
 	// Create bridge
-	if err := CreateBridge(*cfg.BridgeIP); err != nil {
+	if err := CreateBridge(*cfg.BridgeIP, *cfg.Bridge); err != nil {
 		log.Fatalf("Failed to create bridge: %v", err)
 	}
 
 	// Create TAP interfaces (e.g., tap0 and tap1)
 	// tapInterfaces := []string{"tap0", "tap1"}
 	for i := range len(cfg.Templates) {
-		if err := CreateTapInterface("tap" + strconv.Itoa(i)); err != nil {
+		if err := CreateTapInterface("tap"+strconv.Itoa(i), *cfg.Bridge); err != nil {
 			log.Fatalf("Failed to create TAP interface %s: %v", "tap"+strconv.Itoa(i), err)
 		}
 	}
 
 	// Set up NAT
-	if err := SetupNAT(*cfg.Network); err != nil {
+	if err := SetupNAT(*cfg.Network, *cfg.Bridge); err != nil {
 		log.Fatalf("Failed to set up NAT: %v", err)
 	}
 

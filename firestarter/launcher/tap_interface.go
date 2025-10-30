@@ -1,6 +1,6 @@
 package launcher
 
-func CreateTapInterface(tapName string) error {
+func CreateTapInterface(tapName string, bridgeName string) error {
 	// Delete existing TAP interface if it exists
 	RunCommand("ip", "link", "set", tapName, "down")
 	RunCommand("ip", "link", "delete", tapName)
@@ -11,7 +11,7 @@ func CreateTapInterface(tapName string) error {
 	}
 
 	// Attach TAP interface to bridge
-	if err := RunCommand("ip", "link", "set", tapName, "master", "br0"); err != nil {
+	if err := RunCommand("ip", "link", "set", tapName, "master", bridgeName); err != nil {
 		return err
 	}
 
