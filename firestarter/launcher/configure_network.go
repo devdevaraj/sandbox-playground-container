@@ -2,7 +2,6 @@ package launcher
 
 import (
 	"log"
-	"strconv"
 
 	"github.com/devdevaraj/firestarter/init_app"
 )
@@ -14,10 +13,11 @@ func ConfigureNetWork(cfg init_app.Config) {
 	}
 
 	// Create TAP interfaces (e.g., tap0 and tap1)
-	// tapInterfaces := []string{"tap0", "tap1"}
 	for i := range len(cfg.Templates) {
-		if err := CreateTapInterface("tap"+strconv.Itoa(i), *cfg.Bridge); err != nil {
-			log.Fatalf("Failed to create TAP interface %s: %v", "tap"+strconv.Itoa(i), err)
+		for _, j := range cfg.Templates[i].Network {
+			if err := CreateTapInterface(j.TAP, j.Bridge); err != nil {
+				log.Fatalf("Failed to create TAP interface %s: %v", j.TAP, err)
+			}
 		}
 	}
 

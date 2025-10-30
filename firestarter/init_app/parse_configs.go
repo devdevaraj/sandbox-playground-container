@@ -14,7 +14,8 @@ type Nameservers struct {
 
 type Network struct {
 	Name        string      `json:"name,omitempty"`
-	TAP         *string     `json:"tap,omitempty"`
+	TAP         string      `json:"tap,omitempty"`
+	Bridge      *string     `json:"br0,omitempty"`
 	IP          string      `json:"ip,omitempty"`
 	Mask        int         `json:"mask,omitempty"`
 	Gateway     string      `json:"gateway,omitempty"`
@@ -95,11 +96,12 @@ func ParseConfigs(file string) Config {
 
 	for i := range cfg.Templates {
 		if len(cfg.Templates[i].Network) == 0 {
-			tap := "tap" + strconv.Itoa(i)
+			bridge := "br0"
 			cfg.Templates[i].Network = []Network{
 				{
 					Name:    "eth0",
-					TAP:     &tap,
+					TAP:     "tap" + strconv.Itoa(i),
+					Bridge:  &bridge,
 					IP:      "172.16.0." + strconv.Itoa(i+2),
 					Mask:    24,
 					Gateway: "172.16.0.1",
