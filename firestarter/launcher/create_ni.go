@@ -7,8 +7,8 @@ import (
 	"github.com/firecracker-microvm/firecracker-go-sdk"
 )
 
-func CreateNetworkInterface(tapName, ipAddr, gateway, macAddr string) firecracker.NetworkInterface {
-	fmt.Printf(tapName + ipAddr + gateway + macAddr)
+func CreateNetworkInterface(niName, tapName, ipAddr, gateway, macAddr string) firecracker.NetworkInterface {
+	fmt.Printf("%s", tapName+ipAddr+gateway+macAddr)
 	return firecracker.NetworkInterface{
 		StaticConfiguration: &firecracker.StaticNetworkConfiguration{
 			HostDevName: tapName,
@@ -20,7 +20,7 @@ func CreateNetworkInterface(tapName, ipAddr, gateway, macAddr string) firecracke
 				},
 				Gateway:     net.ParseIP(gateway),
 				Nameservers: []string{"8.8.8.8", "1.1.1.1"},
-				IfName:      "eth0",
+				IfName:      niName,
 			},
 		},
 	}

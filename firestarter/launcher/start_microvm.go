@@ -7,6 +7,7 @@ import (
 	"os"
 	"path/filepath"
 
+	"github.com/devdevaraj/firestarter/init_app"
 	"github.com/firecracker-microvm/firecracker-go-sdk"
 	"github.com/firecracker-microvm/firecracker-go-sdk/client/models"
 )
@@ -14,10 +15,8 @@ import (
 func StartMicroVM(
 	ctx context.Context,
 	vmID,
-	tapName,
-	ipAddr,
-	gateway,
-	macAddr string,
+	gateway string,
+	network []init_app.Network,
 	kernelArgs string,
 	kernelImagePath string,
 	rootfsPath string,
@@ -95,7 +94,7 @@ func StartMicroVM(
 			Smt:        firecracker.Bool(smtFlag),
 		},
 		NetworkInterfaces: []firecracker.NetworkInterface{
-			CreateNetworkInterface(tapName, ipAddr, gateway, macAddr),
+			CreateNetworkInterface(network[0].Name, network[0].TAP, network[0].IP, gateway, network[0].MAC),
 		},
 		VMID:     vmID,
 		LogLevel: "Debug",
