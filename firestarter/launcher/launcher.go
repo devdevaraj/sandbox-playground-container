@@ -3,7 +3,6 @@ package launcher
 import (
 	"context"
 	"strconv"
-	"strings"
 
 	"github.com/devdevaraj/firestarter/init_app"
 )
@@ -14,7 +13,6 @@ func Launcher(cfg init_app.Config, ctx context.Context, args []string) {
 		go StartMicroVM(
 			ctx,
 			"vm"+strconv.Itoa(i+1),
-			strings.Split(*cfg.BridgeIP, "/")[0],
 			cfg.Templates[i].Network,
 			cfg.Templates[i].KernelArgs,
 			cfg.Templates[i].Kernel,

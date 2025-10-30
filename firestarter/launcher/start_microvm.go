@@ -14,8 +14,7 @@ import (
 
 func StartMicroVM(
 	ctx context.Context,
-	vmID,
-	gateway string,
+	vmID string,
 	network []init_app.Network,
 	kernelArgs string,
 	kernelImagePath string,
@@ -27,7 +26,7 @@ func StartMicroVM(
 	isZFS *bool,
 	ZFSPath string,
 ) {
-	log.Printf(network[0].Name + network[0].TAP + network[0].MAC + network[0].IP)
+	log.Printf("%s", network[0].Name+network[0].TAP+network[0].MAC+network[0].IP)
 	// Configure VM
 	overlayfsPath := "/root/firecracker/overlayfs/" + vmID + "-overlay.ext4"
 	socketPath := fmt.Sprintf("/tmp/firecracker-%s.sock", vmID)
@@ -95,7 +94,7 @@ func StartMicroVM(
 			Smt:        firecracker.Bool(smtFlag),
 		},
 		NetworkInterfaces: []firecracker.NetworkInterface{
-			CreateNetworkInterface(network[0].Name, network[0].TAP, network[0].IP, gateway, network[0].MAC),
+			CreateNetworkInterface(network[0]),
 		},
 		VMID:     vmID,
 		LogLevel: "Debug",

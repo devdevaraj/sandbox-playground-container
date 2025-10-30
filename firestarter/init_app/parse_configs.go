@@ -7,11 +7,19 @@ import (
 	"strconv"
 )
 
+type Nameservers struct {
+	NS1 string `json:"ns1,omitempty"`
+	NS2 string `json:"ns2,omitempty"`
+}
+
 type Network struct {
-	Name string `json:"name,omitempty"`
-	TAP  string `json:"tap,omitempty"`
-	IP   string `json:"ip,omitempty"`
-	MAC  string `json:"mac,omitempty"`
+	Name        string      `json:"name,omitempty"`
+	TAP         string      `json:"tap,omitempty"`
+	IP          string      `json:"ip,omitempty"`
+	Mask        int         `json:"mask,omitempty"`
+	Gateway     string      `json:"gateway,omitempty"`
+	MAC         string      `json:"mac,omitempty"`
+	Nameservers Nameservers `json:"nameservers"`
 }
 
 type Template struct {
@@ -89,10 +97,17 @@ func ParseConfigs(file string) Config {
 		if len(cfg.Templates[i].Network) == 0 {
 			cfg.Templates[i].Network = []Network{
 				{
-					Name: "eth0",
-					TAP:  "tap" + strconv.Itoa(i),
-					IP:   "172.16.0." + strconv.Itoa(i+2),
-					MAC:  "AA:FC:00:00:00:0" + strconv.Itoa(i+1)},
+					Name:    "eth0",
+					TAP:     "tap" + strconv.Itoa(i),
+					IP:      "172.16.0." + strconv.Itoa(i+2),
+					Mask:    24,
+					Gateway: "172.16.0.1",
+					MAC:     "AA:FC:00:00:00:0" + strconv.Itoa(i+1),
+					Nameservers: Nameservers{
+						NS1: "8.8.8.8",
+						NS2: "1.1.1.1",
+					},
+				},
 			}
 		}
 

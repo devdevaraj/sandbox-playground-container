@@ -1,26 +1,26 @@
 package launcher
 
 import (
-	"fmt"
 	"net"
 
+	"github.com/devdevaraj/firestarter/init_app"
 	"github.com/firecracker-microvm/firecracker-go-sdk"
 )
 
-func CreateNetworkInterface(niName, tapName, ipAddr, gateway, macAddr string) firecracker.NetworkInterface {
-	fmt.Printf("%s", tapName+ipAddr+gateway+macAddr)
+func CreateNetworkInterface(network init_app.Network) firecracker.NetworkInterface {
+	// fmt.Printf("%s", tapName+ipAddr+gateway+macAddr)
 	return firecracker.NetworkInterface{
 		StaticConfiguration: &firecracker.StaticNetworkConfiguration{
-			HostDevName: tapName,
-			MacAddress:  macAddr,
+			HostDevName: network.TAP,
+			MacAddress:  network.MAC,
 			IPConfiguration: &firecracker.IPConfiguration{
 				IPAddr: net.IPNet{
-					IP:   net.ParseIP(ipAddr),
-					Mask: net.CIDRMask(24, 32),
+					IP:   net.ParseIP(network.IP),
+					Mask: net.CIDRMask(network.Mask, 32),
 				},
-				Gateway:     net.ParseIP(gateway),
-				Nameservers: []string{"8.8.8.8", "8.8.4.4"},
-				IfName:      niName,
+				Gateway:     net.ParseIP(network.Gateway),
+				Nameservers: []string{network.Nameservers.NS1, network.Nameservers.NS2},
+				IfName:      network.Name,
 			},
 		},
 	}
