@@ -23,7 +23,9 @@ type Template struct {
 }
 
 type Config struct {
-	VMs       int        `json:"vms"`
+	Bridge    *string    `json:"bridge,omitempty"`
+	BridgeIP  *string    `json:"bridge-ip,omitempty"`
+	Network   *string    `json:"network,omitempty"`
 	Templates []Template `json:"templates"`
 }
 
@@ -36,6 +38,21 @@ func ParseConfigs(file string) Config {
 	var cfg Config
 	if err := json.Unmarshal(data, &cfg); err != nil {
 		log.Fatalf("Failed to unmarshal data: %v", err)
+	}
+
+	if cfg.Bridge == nil {
+		def := "br0"
+		cfg.Bridge = &def
+	}
+
+	if cfg.BridgeIP == nil {
+		def := "172.16.0.1/24"
+		cfg.BridgeIP = &def
+	}
+
+	if cfg.Network == nil {
+		def := "172.16.0.0/24"
+		cfg.Network = &def
 	}
 
 	for i := range cfg.Templates {

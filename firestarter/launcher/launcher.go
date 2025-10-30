@@ -8,7 +8,7 @@ import (
 )
 
 func Launcher(cfg init_app.Config, ctx context.Context, args []string) {
-	ConfigureNetWork("172.16.0.1/24", "172.16.0.0/24", len(cfg.Templates))
+	ConfigureNetWork(cfg)
 	for i := range len(cfg.Templates) {
 		go StartMicroVM(
 			ctx,
