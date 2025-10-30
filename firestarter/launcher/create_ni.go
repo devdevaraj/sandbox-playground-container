@@ -19,7 +19,7 @@ func CreateNetworkInterface(niName, tapName, ipAddr, gateway, macAddr string) fi
 					Mask: net.CIDRMask(24, 32),
 				},
 				Gateway:     net.ParseIP(gateway),
-				Nameservers: []string{"8.8.8.8", "1.1.1.1"},
+				Nameservers: []string{"8.8.8.8", "8.8.4.4"},
 				IfName:      niName,
 			},
 		},
