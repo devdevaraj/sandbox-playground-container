@@ -11,7 +11,7 @@ func CreateNetworkInterface(network init_app.Network) firecracker.NetworkInterfa
 	// fmt.Printf("%s", tapName+ipAddr+gateway+macAddr)
 	return firecracker.NetworkInterface{
 		StaticConfiguration: &firecracker.StaticNetworkConfiguration{
-			HostDevName: network.TAP,
+			HostDevName: *network.TAP,
 			MacAddress:  network.MAC,
 			IPConfiguration: &firecracker.IPConfiguration{
 				IPAddr: net.IPNet{

@@ -26,7 +26,7 @@ func StartMicroVM(
 	isZFS *bool,
 	ZFSPath string,
 ) {
-	log.Printf("%s", network[0].Name+network[0].TAP+network[0].MAC+network[0].IP)
+	// log.Printf("%s", network[0].Name+network[0].TAP+network[0].MAC+network[0].IP)
 	// Configure VM
 	overlayfsPath := "/root/firecracker/overlayfs/" + vmID + "-overlay.ext4"
 	socketPath := fmt.Sprintf("/tmp/firecracker-%s.sock", vmID)
