@@ -8,20 +8,25 @@ import (
 )
 
 func CreateNetworkInterface(network init_app.Network) firecracker.NetworkInterface {
-	// fmt.Printf("%s", tapName+ipAddr+gateway+macAddr)
+	var ipConfig *firecracker.IPConfiguration
+
+	if network.IP != nil && *network.IP != "" {
+		ipConfig = &firecracker.IPConfiguration{
+			IPAddr: net.IPNet{
+				IP:   net.ParseIP(*network.IP),
+				Mask: net.CIDRMask(network.Mask, 32),
+			},
+			Gateway:     net.ParseIP(network.Gateway),
+			Nameservers: []string{network.Nameservers.NS1, network.Nameservers.NS2},
+			IfName:      network.Name,
+		}
+	}
+
 	return firecracker.NetworkInterface{
 		StaticConfiguration: &firecracker.StaticNetworkConfiguration{
-			HostDevName: network.TAP,
-			MacAddress:  network.MAC,
-			IPConfiguration: &firecracker.IPConfiguration{
-				IPAddr: net.IPNet{
-					IP:   net.ParseIP(network.IP),
-					Mask: net.CIDRMask(network.Mask, 32),
-				},
-				Gateway:     net.ParseIP(network.Gateway),
-				Nameservers: []string{network.Nameservers.NS1, network.Nameservers.NS2},
-				IfName:      network.Name,
-			},
+			HostDevName:     network.TAP,
+			MacAddress:      network.MAC,
+			IPConfiguration: ipConfig,
 		},
 	}
 }
