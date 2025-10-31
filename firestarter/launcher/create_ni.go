@@ -11,7 +11,6 @@ func CreateNetworkInterface(networks []init_app.Network) []firecracker.NetworkIn
 	nics := make([]firecracker.NetworkInterface, 0, len(networks))
 	for i, network := range networks {
 		var nic firecracker.NetworkInterface
-
 		if i == 0 && network.IP != nil && *network.IP != "" {
 			nic = firecracker.NetworkInterface{
 				StaticConfiguration: &firecracker.StaticNetworkConfiguration{
@@ -39,6 +38,5 @@ func CreateNetworkInterface(networks []init_app.Network) []firecracker.NetworkIn
 		}
 		nics = append(nics, nic)
 	}
-
 	return nics
 }
