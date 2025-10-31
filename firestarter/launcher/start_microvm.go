@@ -61,11 +61,6 @@ func StartMicroVM(
 		path = ZFSPath
 	}
 
-	nics := make([]firecracker.NetworkInterface, 0, len(network))
-	for _, n := range network {
-		nics = append(nics, CreateNetworkInterface(n))
-	}
-
 	cfg := firecracker.Config{
 		SocketPath:      socketPath,
 		KernelImagePath: kernelImagePath,
@@ -98,7 +93,7 @@ func StartMicroVM(
 			MemSizeMib: firecracker.Int64(int64(ramSize)),
 			Smt:        firecracker.Bool(smtFlag),
 		},
-		NetworkInterfaces: nics,
+		NetworkInterfaces: CreateNetworkInterface(network),
 		VMID:              vmID,
 		LogLevel:          "Debug",
 		LogPath:           filepath.Join(os.TempDir(), fmt.Sprintf("firecracker-%s.log", vmID)),
