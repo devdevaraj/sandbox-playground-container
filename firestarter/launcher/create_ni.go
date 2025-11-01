@@ -26,7 +26,7 @@ import (
 func CreateNetworkInterface(networks []init_app.Network) []firecracker.NetworkInterface {
 	nics := make([]firecracker.NetworkInterface, 0, len(networks))
 	for i, network := range networks {
-		log.Println(network.Name + *network.Bridge)
+		log.Println(network.Name)
 		var nic firecracker.NetworkInterface
 		if i == 0 && network.IP != nil && *network.IP != "" {
 			nic = firecracker.NetworkInterface{
