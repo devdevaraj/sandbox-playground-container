@@ -1,6 +1,7 @@
 package launcher
 
 import (
+	"log"
 	"net"
 
 	"github.com/devdevaraj/firestarter/init_app"
@@ -25,6 +26,7 @@ import (
 func CreateNetworkInterface(networks []init_app.Network) []firecracker.NetworkInterface {
 	nics := make([]firecracker.NetworkInterface, 0, len(networks))
 	for i, network := range networks {
+		log.Println(*network.IP + network.TAP + network.Name + *network.Bridge)
 		var nic firecracker.NetworkInterface
 		if i == 0 && network.IP != nil && *network.IP != "" {
 			nic = firecracker.NetworkInterface{
