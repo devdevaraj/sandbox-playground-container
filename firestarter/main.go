@@ -18,6 +18,8 @@ func main() {
 
 	cfg, args := init_app.Init()
 
+	go func() {}()
+
 	go func() {
 		wsserver.WebSockerServer(WSSPort, *cfg)
 	}()

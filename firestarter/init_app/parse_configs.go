@@ -41,10 +41,11 @@ type Template struct {
 }
 
 type Config struct {
-	Bridge    *string    `json:"bridge,omitempty"`
-	BridgeIP  *string    `json:"bridge-ip,omitempty"`
-	Network   *string    `json:"network,omitempty"`
-	Templates []Template `json:"templates"`
+	Bridge      *string     `json:"bridge,omitempty"`
+	BridgeIP    *string     `json:"bridge-ip,omitempty"`
+	Network     *string     `json:"network,omitempty"`
+	Templates   []Template  `json:"templates"`
+	Nameservers Nameservers `json:"nameservers"`
 }
 
 func ParseConfigs(file string) Config {
