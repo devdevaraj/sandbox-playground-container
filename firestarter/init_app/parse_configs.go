@@ -15,7 +15,7 @@ type Nameservers struct {
 type Network struct {
 	Name        string      `json:"name,omitempty"`
 	TAP         string      `json:"tap,omitempty"`
-	Bridge      *string     `json:"br0,omitempty"`
+	Bridge      *string     `json:"bridge,omitempty"`
 	IP          *string     `json:"ip,omitempty"`
 	Mask        int         `json:"mask,omitempty"`
 	Gateway     string      `json:"gateway,omitempty"`
