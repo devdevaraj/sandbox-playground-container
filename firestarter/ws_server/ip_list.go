@@ -7,11 +7,13 @@ import (
 	"github.com/devdevaraj/firestarter/init_app"
 )
 
-var VM_MAP = map[string]string{}
-var VMS_IP = []struct {
+type VMInfo struct {
 	ip   string
 	name string
-}{}
+}
+
+var VM_MAP = map[string]string{}
+var VMS_IP = []VMInfo{}
 
 type TestResponse struct {
 	Success bool   `json:"success"`
@@ -33,8 +35,10 @@ func PopulateIp(cfg init_app.Config) {
 		ni, index := findPrimary(vm.Network)
 		if index > -1 {
 			VM_MAP["vm"+strconv.Itoa(i+1)] = *ni.IP
-			VMS_IP[i].ip = *ni.IP
-			VMS_IP[i].name = fmt.Sprintf("vm%d", 1+i)
+			VMS_IP = append(VMS_IP, VMInfo{
+				ip:   *ni.IP,
+				name: fmt.Sprintf("vm%d", 1+i),
+			})
 		}
 	}
 }
