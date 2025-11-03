@@ -15,9 +15,9 @@ func WebSockerServer(port string, cfg init_app.Config) {
 	router.HandleFunc("/examiner/test/{vm}/{test}", func(w http.ResponseWriter, r *http.Request) {
 		ExaminerCheck(w, r)
 	})
-	for i := range cfg.Templates {
+	for i, conf := range cfg.Templates {
 		router.HandleFunc("/vm"+strconv.Itoa(i+1)+"/{session}", func(w http.ResponseWriter, r *http.Request) {
-			HandleWebsocket(w, r, "172.16.0."+strconv.Itoa(i+2), "vm"+strconv.Itoa(i+1), cfg.Templates[i])
+			HandleWebsocket(w, r, *conf.Network[0].IP, "vm"+strconv.Itoa(i+1), cfg.Templates[i])
 		})
 	}
 	router.HandleFunc("/wait-for-vms", func(w http.ResponseWriter, r *http.Request) {
