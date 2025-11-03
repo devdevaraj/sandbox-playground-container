@@ -12,6 +12,8 @@ import (
 func WebSockerServer(port string, cfg init_app.Config) {
 	router := mux.NewRouter()
 
+	PopulateIp(cfg)
+
 	router.HandleFunc("/examiner/test/{vm}/{test}", func(w http.ResponseWriter, r *http.Request) {
 		ExaminerCheck(w, r)
 	})

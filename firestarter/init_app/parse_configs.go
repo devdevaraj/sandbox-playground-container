@@ -13,6 +13,7 @@ type Nameservers struct {
 }
 
 type Network struct {
+	IsPrimary   bool        `json:"is-primary"`
 	Name        string      `json:"name,omitempty"`
 	TAP         string      `json:"tap,omitempty"`
 	Bridge      *string     `json:"bridge,omitempty"`
@@ -101,13 +102,14 @@ func ParseConfigs(file string) Config {
 			ip := "172.16.0." + strconv.Itoa(i+2)
 			cfg.Templates[i].Network = []Network{
 				{
-					Name:    "eth0",
-					TAP:     "tap" + strconv.Itoa(i),
-					Bridge:  &bridge,
-					IP:      &ip,
-					Mask:    24,
-					Gateway: "172.16.0.1",
-					MAC:     "AA:FC:00:00:00:0" + strconv.Itoa(i+1),
+					IsPrimary: true,
+					Name:      "eth0",
+					TAP:       "tap" + strconv.Itoa(i),
+					Bridge:    &bridge,
+					IP:        &ip,
+					Mask:      24,
+					Gateway:   "172.16.0.1",
+					MAC:       "AA:FC:00:00:00:0" + strconv.Itoa(i+1),
 					Nameservers: Nameservers{
 						NS1: "8.8.8.8",
 						NS2: "1.1.1.1",
