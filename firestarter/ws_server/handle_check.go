@@ -15,9 +15,9 @@ func HandleCheck(w http.ResponseWriter, r *http.Request, no_vms int) {
 	timeout := 10 * time.Second
 	retryInterval := 500 * time.Millisecond
 
-	vms := makeVMs(no_vms)
+	// vms := makeVMs(no_vms)
 
-	for _, vm := range vms {
+	for _, vm := range VMS_IP {
 		wg.Add(1)
 		go func(vmIP, vmName string) {
 			defer wg.Done()
@@ -47,19 +47,19 @@ func HandleCheck(w http.ResponseWriter, r *http.Request, no_vms int) {
 	w.Write([]byte("Both VMs are ready."))
 }
 
-func makeVMs(count int) []struct {
-	ip   string
-	name string
-} {
-	vms := make([]struct {
-		ip   string
-		name string
-	}, count)
+// func makeVMs(count int) []struct {
+// 	ip   string
+// 	name string
+// } {
+// 	vms := make([]struct {
+// 		ip   string
+// 		name string
+// 	}, count)
 
-	for i := range count {
-		vms[i].ip = fmt.Sprintf("172.16.0.%d", 2+i)
-		vms[i].name = fmt.Sprintf("vm%d", 1+i)
-	}
+// 	for i := range count {
+// 		vms[i].ip = fmt.Sprintf("172.16.0.%d", 2+i)
+// 		vms[i].name = fmt.Sprintf("vm%d", 1+i)
+// 	}
 
-	return vms
-}
+// 	return vms
+// }
