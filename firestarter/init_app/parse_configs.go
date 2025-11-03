@@ -139,8 +139,7 @@ func ParseConfigs(file string) Config {
 			}
 		}
 
-		PrintConfig(cfg)
 	}
-
+	PrintConfig(cfg)
 	return cfg
 }
