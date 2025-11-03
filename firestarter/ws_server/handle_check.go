@@ -13,7 +13,7 @@ func HandleCheck(w http.ResponseWriter, r *http.Request, no_vms int) {
 	errChan := make(chan error, 2)
 
 	timeout := 10 * time.Second
-	retryInterval := 250 * time.Millisecond
+	retryInterval := 200 * time.Millisecond
 
 	// vms := makeVMs(no_vms)
 
