@@ -39,6 +39,7 @@ type Template struct {
 	RootFS        string    `json:"rootfs"`
 	Username      *string   `json:"username,omitempty"`
 	EnableIDE     *bool     `json:"enable-ide"`
+	IDEPort       *int      `json:"ide-port"`
 	Network       []Network `json:"network"`
 }
 

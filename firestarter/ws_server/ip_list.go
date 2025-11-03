@@ -14,9 +14,7 @@ type VMInfo struct {
 
 var VM_MAP = map[string]string{}
 var VMS_IP = []VMInfo{}
-var TARGET_CACHE = map[string]string{
-	// "codeserverprt": "172.16.0.2:40000",
-}
+var TARGET_CACHE = map[string]string{}
 
 type TestResponse struct {
 	Success bool   `json:"success"`
@@ -43,7 +41,7 @@ func PopulateIp(cfg init_app.Config) {
 				name: fmt.Sprintf("vm%d", 1+i),
 			})
 			if *vm.EnableIDE {
-				TARGET_CACHE["codeserverprt"] = *ni.IP + ":40000"
+				TARGET_CACHE["codeserverprt"] = *ni.IP + ":" + strconv.Itoa(*vm.IDEPort)
 			}
 		}
 	}
