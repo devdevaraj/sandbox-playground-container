@@ -2,7 +2,6 @@ package wsserver
 
 import (
 	"fmt"
-	"log"
 	"strconv"
 
 	"github.com/devdevaraj/firestarter/init_app"
@@ -42,7 +41,6 @@ func PopulateIp(cfg init_app.Config) {
 				name: fmt.Sprintf("vm%d", 1+i),
 			})
 			if *vm.EnableIDE {
-				log.Printf(strconv.Itoa(*vm.IDEPort))
 				TARGET_CACHE["codeserverprt"] = *ni.IP + ":" + strconv.Itoa(*vm.IDEPort)
 			}
 		}

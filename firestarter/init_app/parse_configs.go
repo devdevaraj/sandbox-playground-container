@@ -139,12 +139,7 @@ func ParseConfigs(file string) Config {
 			}
 		}
 
-		// for j := range cfg.Templates[i].Network {
-		// 	if cfg.Templates[i].Network[j].Name == nil {
-		// 		def := "172.16.0." + strconv.Itoa(i+2)
-		// 		cfg.Templates[i].IP = &def
-		// 	}
-		// }
+		PrintConfig(cfg)
 	}
 
 	return cfg
