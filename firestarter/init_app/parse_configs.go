@@ -99,6 +99,13 @@ func ParseConfigs(file string) Config {
 	}
 
 	for i := range cfg.Templates {
+		if cfg.Templates[i].IDEPort == nil {
+			def := 40000
+			cfg.Templates[i].IDEPort = &def
+		}
+	}
+
+	for i := range cfg.Templates {
 		if cfg.Templates[i].EnableIDE == nil {
 			if i == 0 {
 				def := true
