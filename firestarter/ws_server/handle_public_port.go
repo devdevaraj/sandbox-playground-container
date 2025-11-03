@@ -12,9 +12,7 @@ type PortID struct {
 	Target string `json:"target"`
 }
 
-var target_cache = map[string]string{
-	"codeserverprt": "172.16.0.2:40000",
-}
+var target_cache = TARGET_CACHE
 
 var proxy_cache = map[string]*HTTPWSProxy{}
 

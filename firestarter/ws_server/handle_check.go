@@ -46,20 +46,3 @@ func HandleCheck(w http.ResponseWriter, r *http.Request, no_vms int) {
 	w.WriteHeader(http.StatusOK)
 	w.Write([]byte("Both VMs are ready."))
 }
-
-// func makeVMs(count int) []struct {
-// 	ip   string
-// 	name string
-// } {
-// 	vms := make([]struct {
-// 		ip   string
-// 		name string
-// 	}, count)
-
-// 	for i := range count {
-// 		vms[i].ip = fmt.Sprintf("172.16.0.%d", 2+i)
-// 		vms[i].name = fmt.Sprintf("vm%d", 1+i)
-// 	}
-
-// 	return vms
-// }

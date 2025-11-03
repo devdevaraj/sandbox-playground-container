@@ -38,6 +38,7 @@ type Template struct {
 	Kernel        string    `json:"kernel"`
 	RootFS        string    `json:"rootfs"`
 	Username      *string   `json:"username,omitempty"`
+	EnableIDE     *bool     `json:"enable-ide"`
 	Network       []Network `json:"network"`
 }
 
@@ -93,6 +94,18 @@ func ParseConfigs(file string) Config {
 		if cfg.Templates[i].Username == nil {
 			def := "root"
 			cfg.Templates[i].Username = &def
+		}
+	}
+
+	for i := range cfg.Templates {
+		if cfg.Templates[i].EnableIDE == nil {
+			if i == 0 {
+				def := true
+				cfg.Templates[i].EnableIDE = &def
+			} else {
+				def := false
+				cfg.Templates[i].EnableIDE = &def
+			}
 		}
 	}
 
