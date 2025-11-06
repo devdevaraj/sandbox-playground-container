@@ -1,6 +1,6 @@
 #!/bin/bash
 
-IMAGE=${1:-"repo.synnefo.solutions/devaraj/playground"}
+IMAGE=${1:-"repo.synnefo.in/dev/playground"}
 
 (cd ./firestarter && go build .)
 # (cd ./firestarter && go build .)

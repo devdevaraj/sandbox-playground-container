@@ -9,7 +9,6 @@ import (
 )
 
 func HTTPProxy(port string) {
-
 	http.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
 		subdomain := strings.Split(r.Host, ".")[0]
 		split := strings.Split(subdomain, "-")
