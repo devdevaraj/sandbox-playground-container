@@ -25,7 +25,7 @@ func StartMicroVM(
 	enableOverlay *bool,
 	isZFS *bool,
 	ZFSPath string,
-) {
+) (*firecracker.Machine, error) {
 	// log.Printf("%s", network[0].Name+network[0].TAP+network[0].MAC+network[0].IP)
 	// Configure VM
 	overlayfsPath := "/root/firecracker/overlayfs/" + vmID + "-overlay.ext4"
@@ -134,6 +134,8 @@ func StartMicroVM(
 			log.Printf("Balloon device created with initial size: %d MiB", initialBalloonSize)
 		}
 	}
+
+	return m, nil
 }
 
 func defaultInt(ptr *int, defaultVal int) int {
