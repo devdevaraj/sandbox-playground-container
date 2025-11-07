@@ -27,8 +27,8 @@ func StartMicroVM(
 	ZFSPath string,
 ) (*firecracker.Machine, error) {
 	// Configure VM
-	balloon := true
-	balloonSize := 128
+	// balloon := true
+	// balloonSize := 128
 	overlayfsPath := "/root/firecracker/overlayfs/" + vmID + "-overlay.ext4"
 	socketPath := fmt.Sprintf("/tmp/firecracker-%s.sock", vmID)
 
