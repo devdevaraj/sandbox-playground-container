@@ -109,19 +109,19 @@ func StartMicroVM(
 		WithStderr(os.Stderr).
 		Build(ctx)
 
-	// machineOpts := []firecracker.Opt{
-	// 	firecracker.WithProcessRunner(cmd),
-	// }
-
-	m, err := firecracker.NewMachine(ctx, cfg, firecracker.WithProcessRunner(cmd))
-	if err != nil {
-		log.Fatalf("Failed to create machine: %v", err)
+	machineOpts := []firecracker.Opt{
+		firecracker.WithProcessRunner(cmd),
 	}
 
-	// m, err := firecracker.NewMachine(ctx, cfg, machineOpts...)
+	// m, err := firecracker.NewMachine(ctx, cfg, firecracker.WithProcessRunner(cmd))
 	// if err != nil {
 	// 	log.Fatalf("Failed to create machine: %v", err)
 	// }
+
+	m, err := firecracker.NewMachine(ctx, cfg, machineOpts...)
+	if err != nil {
+		log.Fatalf("Failed to create machine: %v", err)
+	}
 
 	// if balloon {
 	// 	initialBalloonSize := int64(defaultInt(&balloonSize, 0))
