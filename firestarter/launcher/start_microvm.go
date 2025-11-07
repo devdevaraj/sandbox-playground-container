@@ -119,9 +119,11 @@ func StartMicroVM(
 	// Start the VM
 	log.Println("Starting Firecracker VM...")
 	go func() {
+
 		if err := m.Start(ctx); err != nil {
 			log.Fatalf("Failed to start machine: %v", err)
 		}
+
 		if balloon {
 			initialBalloonSize := int64(defaultInt(&balloonSize, 0))
 			statsPollingInterval := int64(1)
@@ -132,6 +134,7 @@ func StartMicroVM(
 				log.Printf("Balloon device created with initial size: %d MiB", initialBalloonSize)
 			}
 		}
+
 	}()
 
 	return m, nil
