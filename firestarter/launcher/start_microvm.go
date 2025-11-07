@@ -109,28 +109,33 @@ func StartMicroVM(
 		WithStderr(os.Stderr).
 		Build(ctx)
 
-	machineOpts := []firecracker.Opt{
-		firecracker.WithProcessRunner(cmd),
-	}
+	// machineOpts := []firecracker.Opt{
+	// 	firecracker.WithProcessRunner(cmd),
+	// }
 
-	m, err := firecracker.NewMachine(ctx, cfg, machineOpts...)
+	m, err := firecracker.NewMachine(ctx, cfg, firecracker.WithProcessRunner(cmd))
 	if err != nil {
 		log.Fatalf("Failed to create machine: %v", err)
 	}
 
-	if balloon {
-		initialBalloonSize := int64(defaultInt(&balloonSize, 0))
-		statsPollingInterval := int64(1)
+	// m, err := firecracker.NewMachine(ctx, cfg, machineOpts...)
+	// if err != nil {
+	// 	log.Fatalf("Failed to create machine: %v", err)
+	// }
 
-		balloonHandler := firecracker.NewCreateBalloonHandler(
-			initialBalloonSize,
-			true, // deflate on OOM
-			statsPollingInterval,
-		)
+	// if balloon {
+	// 	initialBalloonSize := int64(defaultInt(&balloonSize, 0))
+	// 	statsPollingInterval := int64(1)
 
-		m.Handlers.Validation = m.Handlers.Validation.Append(balloonHandler)
-		log.Printf("Balloon handler added with initial size: %d MiB", initialBalloonSize)
-	}
+	// 	balloonHandler := firecracker.NewCreateBalloonHandler(
+	// 		initialBalloonSize,
+	// 		true, // deflate on OOM
+	// 		statsPollingInterval,
+	// 	)
+
+	// 	m.Handlers.Validation = m.Handlers.Validation.Append(balloonHandler)
+	// 	log.Printf("Balloon handler added with initial size: %d MiB", initialBalloonSize)
+	// }
 
 	// Start the VM
 	log.Println("Starting Firecracker VM...")
