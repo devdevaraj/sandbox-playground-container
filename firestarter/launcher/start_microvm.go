@@ -26,8 +26,9 @@ func StartMicroVM(
 	isZFS *bool,
 	ZFSPath string,
 ) (*firecracker.Machine, error) {
-	// log.Printf("%s", network[0].Name+network[0].TAP+network[0].MAC+network[0].IP)
 	// Configure VM
+	balloon := true
+	balloonSize := 128
 	overlayfsPath := "/root/firecracker/overlayfs/" + vmID + "-overlay.ext4"
 	socketPath := fmt.Sprintf("/tmp/firecracker-%s.sock", vmID)
 
@@ -108,32 +109,47 @@ func StartMicroVM(
 		WithStderr(os.Stderr).
 		Build(ctx)
 
-	m, err := firecracker.NewMachine(ctx, cfg, firecracker.WithProcessRunner(cmd))
+	machineOpts := []firecracker.Opt{
+		firecracker.WithProcessRunner(cmd),
+	}
+
+	m, err := firecracker.NewMachine(ctx, cfg, machineOpts...)
 	if err != nil {
 		log.Fatalf("Failed to create machine: %v", err)
 	}
 
-	balloon := true
-	balloonSize := 128
+	if balloon {
+		initialBalloonSize := int64(defaultInt(&balloonSize, 0))
+		statsPollingInterval := int64(1)
+
+		balloonHandler := firecracker.NewCreateBalloonHandler(
+			initialBalloonSize,
+			true, // deflate on OOM
+			statsPollingInterval,
+		)
+
+		m.Handlers.Validation = m.Handlers.Validation.Append(balloonHandler)
+		log.Printf("Balloon handler added with initial size: %d MiB", initialBalloonSize)
+	}
 
 	// Start the VM
 	log.Println("Starting Firecracker VM...")
 	go func() {
 
-		if balloon {
-			initialBalloonSize := int64(defaultInt(&balloonSize, 0))
-			statsPollingInterval := int64(1)
-
-			if err := m.CreateBalloon(ctx, initialBalloonSize, true, statsPollingInterval); err != nil {
-				log.Printf("Warning: Failed to create balloon device: %v", err)
-			} else {
-				log.Printf("Balloon device created with initial size: %d MiB", initialBalloonSize)
-			}
-		}
-
 		if err := m.Start(ctx); err != nil {
 			log.Fatalf("Failed to start machine: %v", err)
 		}
+
+		// if balloon {
+		// 	initialBalloonSize := int64(defaultInt(&balloonSize, 0))
+		// 	statsPollingInterval := int64(1)
+
+		// 	if err := m.CreateBalloon(ctx, initialBalloonSize, true, statsPollingInterval); err != nil {
+		// 		log.Printf("Warning: Failed to create balloon device: %v", err)
+		// 	} else {
+		// 		log.Printf("Balloon device created with initial size: %d MiB", initialBalloonSize)
+		// 	}
+		// }
 
 	}()
 
