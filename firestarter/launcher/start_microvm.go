@@ -27,8 +27,8 @@ func StartMicroVM(
 	ZFSPath string,
 ) (*firecracker.Machine, error) {
 	// Configure VM
-	// balloon := true
-	// balloonSize := 128
+	balloon := true
+	balloonSize := 128
 	overlayfsPath := "/root/firecracker/overlayfs/" + vmID + "-overlay.ext4"
 	socketPath := fmt.Sprintf("/tmp/firecracker-%s.sock", vmID)
 
@@ -123,19 +123,19 @@ func StartMicroVM(
 		log.Fatalf("Failed to create machine: %v", err)
 	}
 
-	// if balloon {
-	// 	initialBalloonSize := int64(defaultInt(&balloonSize, 0))
-	// 	statsPollingInterval := int64(1)
+	if balloon {
+		initialBalloonSize := int64(defaultInt(&balloonSize, 0))
+		statsPollingInterval := int64(1)
 
-	// 	balloonHandler := firecracker.NewCreateBalloonHandler(
-	// 		initialBalloonSize,
-	// 		true, // deflate on OOM
-	// 		statsPollingInterval,
-	// 	)
+		balloonHandler := firecracker.NewCreateBalloonHandler(
+			initialBalloonSize,
+			true,
+			statsPollingInterval,
+		)
 
-	// 	m.Handlers.Validation = m.Handlers.Validation.Append(balloonHandler)
-	// 	log.Printf("Balloon handler added with initial size: %d MiB", initialBalloonSize)
-	// }
+		m.Handlers.Validation = m.Handlers.Validation.Append(balloonHandler)
+		log.Printf("Balloon handler added with initial size: %d MiB", initialBalloonSize)
+	}
 
 	// Start the VM
 	log.Println("Starting Firecracker VM...")
