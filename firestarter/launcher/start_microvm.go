@@ -113,27 +113,26 @@ func StartMicroVM(
 		log.Fatalf("Failed to create machine: %v", err)
 	}
 
+	balloon := true
+	balloonSize := 128
+
 	// Start the VM
 	log.Println("Starting Firecracker VM...")
 	go func() {
 		if err := m.Start(ctx); err != nil {
 			log.Fatalf("Failed to start machine: %v", err)
 		}
-	}()
+		if balloon {
+			initialBalloonSize := int64(defaultInt(&balloonSize, 0))
+			statsPollingInterval := int64(1)
 
-	balloon := true
-	balloonSize := 128
-
-	if balloon {
-		initialBalloonSize := int64(defaultInt(&balloonSize, 0))
-		statsPollingInterval := int64(1)
-
-		if err := m.CreateBalloon(ctx, initialBalloonSize, true, statsPollingInterval); err != nil {
-			log.Printf("Warning: Failed to create balloon device: %v", err)
-		} else {
-			log.Printf("Balloon device created with initial size: %d MiB", initialBalloonSize)
+			if err := m.CreateBalloon(ctx, initialBalloonSize, true, statsPollingInterval); err != nil {
+				log.Printf("Warning: Failed to create balloon device: %v", err)
+			} else {
+				log.Printf("Balloon device created with initial size: %d MiB", initialBalloonSize)
+			}
 		}
-	}
+	}()
 
 	return m, nil
 }
