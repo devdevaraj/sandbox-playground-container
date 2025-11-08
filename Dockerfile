@@ -5,17 +5,17 @@ RUN apt-get update && apt-get install -y \
     qemu-kvm \
     libvirt-daemon-system \
     libvirt-clients \
-    curl \
+    # curl \
     wget \
     tar \
-    jq \
+    # jq \
     iptables \
     dnsmasq \
     bridge-utils \
     iproute2 \
     procps \
     ca-certificates \
-    git \
+    # git \
     build-essential \
     python3 \
     python3-pip \
