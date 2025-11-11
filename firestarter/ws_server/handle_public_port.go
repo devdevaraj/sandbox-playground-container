@@ -65,36 +65,11 @@ func GetProxy(id string) (*HTTPWSProxy, bool) {
 	if !ok || target == "" {
 		return nil, false
 	}
-
 	cachedProxy, POk := proxy_cache[id]
 	if POk {
 		return cachedProxy, true
 	}
-
 	reverseProxy := NewHTTPWSProxy(target)
-
-	// targetURL, err := url.Parse("http://" + target)
-	// if err != nil {
-	// 	log.Fatal("Error parsing target URL: ", err)
-	// 	return nil, false
-	// }
-	// reverseProxy := httputil.NewSingleHostReverseProxy(targetURL)
-	// reverseProxy.Director = func(req *http.Request) {
-	// 	req.URL.Scheme = targetURL.Scheme
-	// 	req.URL.Host = targetURL.Host
-	// 	req.Host = targetURL.Host
-
-	// 	// Preserve WebSocket headers
-	// 	if strings.ToLower(req.Header.Get("Connection")) == "upgrade" &&
-	// 		strings.ToLower(req.Header.Get("Upgrade")) == "websocket" {
-	// 		log.Printf("Web socket in")
-	// 		req.Header.Set("Connection", "upgrade")
-	// 		req.Header.Set("Upgrade", "websocket")
-	// 	}
-	// 	req.Header.Set("X-Forwarded-For", "")
-	// 	req.Header.Set("X-Real-IP", "")
-	// }
 	proxy_cache[id] = reverseProxy
-
 	return reverseProxy, true
 }

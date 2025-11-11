@@ -39,14 +39,10 @@ RUN mkdir -p /root/firecracker/keys
 COPY ./keys/id_rsa /root/firecracker/keys/ubuntu-24.04.id_rsa
 
 COPY ./firestarter/firestarter /root/firecracker/firestarter
-# COPY ./firestarter/firestarter /root/firecracker/firestarter
-# COPY ./wss/wss /root/firecracker/ws-server
 
-# COPY ./runner/runner.sh /root/firecracker/runner.sh
-# RUN chmod +x /root/firecracker/runner.sh
+COPY ./cloud-init/cloud-init.img /root/firecracker/cloud-init.img
 
 WORKDIR /root/firecracker
 
 ENTRYPOINT ["/root/firecracker/firestarter"]
-# ENTRYPOINT ["/root/firecracker/runner.sh"]
 CMD ["ubuntu2404n1"]

@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 	"log"
+	"net"
 	"os"
 	"path/filepath"
 
@@ -27,9 +28,8 @@ func StartMicroVM(
 	ZFSPath string,
 ) (*firecracker.Machine, error) {
 	// Configure VM
-	// balloon := true
-	// balloonSize := 128
 	overlayfsPath := "/root/firecracker/overlayfs/" + vmID + "-overlay.ext4"
+	cloudInitPath := "/root/firecracker/cloud-init.img"
 	socketPath := fmt.Sprintf("/tmp/firecracker-%s.sock", vmID)
 
 	// Check if socket exists and remove it
@@ -52,7 +52,7 @@ func StartMicroVM(
 
 	cpuCount := defaultInt(cpu, 2)
 	ramSize := defaultInt(ram, 2048)
-	kernelArgsString := defaultString(&kernelArgs, "console=ttyS0 reboot=k panic=1 pci=off hostname="+vmID+" overlay_root=vdb init=/sbin/overlay-init")
+	kernelArgsString := defaultString(&kernelArgs, "console=ttyS0 reboot=k panic=1 pci=off hostname="+vmID+" overlay_root=vdb init=/sbin/overlay-init ip=172.16.0.2::172.16.0.1:255.255.255.0::eth0:off ds=nocloud")
 	smtFlag := defaultBool(smt, false)
 	overlay := defaultBool(enableOverlay, false)
 	zfs := defaultBool(isZFS, false)
@@ -77,6 +77,12 @@ func StartMicroVM(
 					RateLimiter:  nil,
 				},
 			}
+			drives = append(drives, models.Drive{
+				DriveID:      firecracker.String("cloudinit"),
+				IsRootDevice: firecracker.Bool(false),
+				IsReadOnly:   firecracker.Bool(true),
+				PathOnHost:   &cloudInitPath,
+			})
 			if overlay {
 				drives = append(drives, models.Drive{
 					DriveID:      firecracker.String("overlayfs"),
@@ -98,6 +104,8 @@ func StartMicroVM(
 		VMID:              vmID,
 		LogLevel:          "Debug",
 		LogPath:           filepath.Join(os.TempDir(), fmt.Sprintf("firecracker-%s.log", vmID)),
+		MmdsVersion:       firecracker.MMDSv2,
+		MmdsAddress:       net.ParseIP("169.254.169.254"),
 	}
 
 	// Let's use a simpler approach without FIFOs
@@ -105,43 +113,52 @@ func StartMicroVM(
 		WithBin("firecracker").
 		WithSocketPath(socketPath).
 		// WithStdin(os.Stdin).
-		// WithStdout(os.Stdout).
+		WithStdout(os.Stdout).
 		WithStderr(os.Stderr).
 		Build(ctx)
-
-	// machineOpts := []firecracker.Opt{
-	// 	firecracker.WithProcessRunner(cmd),
-	// }
 
 	m, err := firecracker.NewMachine(ctx, cfg, firecracker.WithProcessRunner(cmd))
 	if err != nil {
 		log.Fatalf("Failed to create machine: %v", err)
 	}
 
-	// m, err := firecracker.NewMachine(ctx, cfg, machineOpts...)
-	// if err != nil {
-	// 	log.Fatalf("Failed to create machine: %v", err)
-	// }
-
-	// if balloon {
-	// 	initialBalloonSize := int64(defaultInt(&balloonSize, 0))
-	// 	statsPollingInterval := int64(1)
-
-	// 	balloonHandler := firecracker.NewCreateBalloonHandler(
-	// 		initialBalloonSize,
-	// 		true,
-	// 		statsPollingInterval,
-	// 	)
-
-	// 	m.Handlers.Validation = m.Handlers.Validation.Append(balloonHandler)
-	// 	log.Printf("Balloon handler added with initial size: %d MiB", initialBalloonSize)
-	// }
+	// Set MMDS metadata
+	metadata := map[string]interface{}{
+		"latest": map[string]interface{}{
+			"meta-data": map[string]interface{}{
+				"instance-id":    "i-dual-nic-001",
+				"local-hostname": "dual-nic-vm",
+				"network": map[string]interface{}{
+					"interfaces": map[string]interface{}{
+						"eth0": map[string]interface{}{
+							"ipv4": map[string]string{
+								"ip_address": "172.16.0.2",
+								"netmask":    "255.255.255.0",
+								"gateway":    "172.16.0.1",
+							},
+						},
+						"eth1": map[string]interface{}{
+							"ipv4": map[string]string{
+								"ip_address": "172.16.0.3",
+								"netmask":    "255.255.255.0",
+								"gateway":    "172.16.0.1",
+							},
+						},
+					},
+				},
+			},
+		},
+	}
 
 	// Start the VM
 	log.Println("Starting Firecracker VM...")
 	go func() {
 		if err := m.Start(ctx); err != nil {
 			log.Fatalf("Failed to start machine: %v", err)
+		}
+
+		if err := m.SetMetadata(ctx, metadata); err != nil {
+			log.Printf("Warning: Failed to set metadata: %v", err)
 		}
 	}()
 

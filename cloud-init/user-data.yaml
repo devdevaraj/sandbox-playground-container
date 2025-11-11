@@ -1,0 +1,19 @@
+#cloud-config
+users:
+  - name: admin
+    ssh_authorized_keys:
+      - ssh-rsa YOUR_SSH_PUBLIC_KEY_HERE
+    sudo: ALL=(ALL) NOPASSWD:ALL
+    shell: /bin/bash
+
+write_files:
+  - path: /etc/network-info.txt
+    content: |
+      Dual NIC Configuration
+      eth0: 172.16.0.2/24
+      eth1: 172.16.0.3/24
+    permissions: '0644'
+
+runcmd:
+  - echo "Dual network interfaces configured"
+  - ip addr show

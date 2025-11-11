@@ -28,7 +28,7 @@ func CreateNetworkInterface(networks []init_app.Network) []firecracker.NetworkIn
 	for i, network := range networks {
 		log.Println(network.Name)
 		var nic firecracker.NetworkInterface
-		if i == 0 && network.IP != nil && *network.IP != "" {
+		if i == 0 && network.IP != nil && *network.IP != "" && false {
 			nic = firecracker.NetworkInterface{
 				StaticConfiguration: &firecracker.StaticNetworkConfiguration{
 					HostDevName: network.TAP,
@@ -49,8 +49,18 @@ func CreateNetworkInterface(networks []init_app.Network) []firecracker.NetworkIn
 				StaticConfiguration: &firecracker.StaticNetworkConfiguration{
 					HostDevName: network.TAP,
 					MacAddress:  network.MAC,
+					// IPConfiguration: &firecracker.IPConfiguration{
+					// 	IfName: network.Name,
+					// },
 				},
-				CNIConfiguration: nil,
+				AllowMMDS: func() bool {
+					if network.Name == "eth0" {
+						return true
+					} else {
+						return false
+					}
+				}(),
+				// CNIConfiguration: nil,
 			}
 		}
 		nics = append(nics, nic)
