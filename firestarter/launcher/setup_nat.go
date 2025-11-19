@@ -1,6 +1,9 @@
 package launcher
 
+import "log"
+
 func SetupNAT(ipAddr string, bridgeName string) error {
+	log.Printf("Setting NAT for Bridge %s with ip %s", bridgeName, ipAddr)
 	// Enable IP forwarding
 	if err := RunCommand("sysctl", "-w", "net.ipv4.ip_forward=1"); err != nil {
 		return err

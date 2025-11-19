@@ -17,13 +17,16 @@ func PrintConfig(c Config) {
 	indentCfg := "Config:"
 	printIndent("", indentCfg)
 
-	printIndent("  Bridge:      ", formatPtr(c.Bridge))
-	printIndent("  BridgeIP:    ", formatPtr(c.BridgeIP))
-	printIndent("  Network:     ", formatPtr(c.Network))
+	for ti, tmpl := range c.Bridges {
+		printIndent(fmt.Sprintf("  Network #%d:", ti), "")
+		printIndent("    Bridge:      ", formatPtr(tmpl.Bridge))
+		printIndent("    BridgeIP:    ", formatPtr(tmpl.BridgeIP))
+		printIndent("    Network:     ", formatPtr(tmpl.Network))
 
-	printIndent("  Nameservers:", "")
-	printIndent("    NS1:      ", c.Nameservers.NS1)
-	printIndent("    NS2:      ", c.Nameservers.NS2)
+		printIndent("    Nameservers:", "")
+		printIndent("      NS1:      ", tmpl.Nameservers.NS1)
+		printIndent("      NS2:      ", tmpl.Nameservers.NS2)
+	}
 
 	for ti, tmpl := range c.Templates {
 		printIndent(fmt.Sprintf("  Template #%d:", ti), "")

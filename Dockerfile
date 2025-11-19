@@ -40,8 +40,6 @@ COPY ./keys/id_rsa /root/firecracker/keys/ubuntu-24.04.id_rsa
 
 COPY ./firestarter/firestarter /root/firecracker/firestarter
 
-COPY ./cloud-init/cloud-init.img /root/firecracker/cloud-init.img
-
 WORKDIR /root/firecracker
 
 ENTRYPOINT ["/root/firecracker/firestarter"]

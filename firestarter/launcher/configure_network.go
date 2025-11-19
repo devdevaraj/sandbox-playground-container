@@ -8,8 +8,10 @@ import (
 
 func ConfigureNetWork(cfg init_app.Config) {
 	// Create bridge
-	if err := CreateBridge(*cfg.BridgeIP, *cfg.Bridge); err != nil {
-		log.Fatalf("Failed to create bridge: %v", err)
+	for _, br := range cfg.Bridges {
+		if err := CreateBridge(*br.BridgeIP, *br.Bridge); err != nil {
+			log.Fatalf("Failed to create bridge: %v", err)
+		}
 	}
 
 	// Create TAP interfaces (e.g., tap0 and tap1)
@@ -22,8 +24,12 @@ func ConfigureNetWork(cfg init_app.Config) {
 	}
 
 	// Set up NAT
-	if err := SetupNAT(*cfg.Network, *cfg.Bridge); err != nil {
-		log.Fatalf("Failed to set up NAT: %v", err)
+	for _, br := range cfg.Bridges {
+		if br.NAT != nil && *br.NAT {
+			if err := SetupNAT(*br.Network, *br.Bridge); err != nil {
+				log.Fatalf("Failed to set up NAT: %v", err)
+			}
+		}
 	}
 
 	log.Println("Network setup completed successfully.")

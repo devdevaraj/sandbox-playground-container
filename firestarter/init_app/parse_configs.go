@@ -38,17 +38,24 @@ type Template struct {
 	Kernel        string    `json:"kernel"`
 	RootFS        string    `json:"rootfs"`
 	Username      *string   `json:"username,omitempty"`
+	EnableGUI     *bool     `json:"enable-gui"`
+	GUIPort       *int      `json:"gui-port"`
 	EnableIDE     *bool     `json:"enable-ide"`
 	IDEPort       *int      `json:"ide-port"`
 	Network       []Network `json:"network"`
 }
 
-type Config struct {
+type Bridges struct {
+	NAT         *bool       `json:"nat,omitempty"`
 	Bridge      *string     `json:"bridge,omitempty"`
 	BridgeIP    *string     `json:"bridge-ip,omitempty"`
 	Network     *string     `json:"network,omitempty"`
-	Templates   []Template  `json:"templates"`
 	Nameservers Nameservers `json:"nameservers"`
+}
+
+type Config struct {
+	Bridges   []Bridges  `json:"bridges"`
+	Templates []Template `json:"templates"`
 }
 
 func ParseConfigs(file string) Config {
@@ -62,19 +69,23 @@ func ParseConfigs(file string) Config {
 		log.Fatalf("Failed to unmarshal data: %v", err)
 	}
 
-	if cfg.Bridge == nil {
-		def := "br0"
-		cfg.Bridge = &def
-	}
-
-	if cfg.BridgeIP == nil {
-		def := "172.16.0.1/24"
-		cfg.BridgeIP = &def
-	}
-
-	if cfg.Network == nil {
-		def := "172.16.0.0/24"
-		cfg.Network = &def
+	if len(cfg.Bridges) == 0 {
+		nat := true
+		bridge := "br0"
+		bridge_ip := "172.16.0.1/24"
+		network := "172.16.0.0/24"
+		cfg.Bridges = []Bridges{
+			{
+				NAT:      &nat,
+				Bridge:   &bridge,
+				BridgeIP: &bridge_ip,
+				Network:  &network,
+				Nameservers: Nameservers{
+					NS1: "8.8.8.8",
+					NS2: "1.1.1.1",
+				},
+			},
+		}
 	}
 
 	for i := range cfg.Templates {
@@ -82,30 +93,32 @@ func ParseConfigs(file string) Config {
 			def := false
 			cfg.Templates[i].IsZFS = &def
 		}
-	}
 
-	for i := range cfg.Templates {
 		if cfg.Templates[i].EnableOverlay == nil {
 			def := false
 			cfg.Templates[i].EnableOverlay = &def
 		}
-	}
 
-	for i := range cfg.Templates {
 		if cfg.Templates[i].Username == nil {
 			def := "root"
 			cfg.Templates[i].Username = &def
 		}
-	}
 
-	for i := range cfg.Templates {
+		if cfg.Templates[i].GUIPort == nil {
+			def := 8444
+			cfg.Templates[i].GUIPort = &def
+		}
+
+		if cfg.Templates[i].EnableGUI == nil {
+			def := false
+			cfg.Templates[i].EnableGUI = &def
+		}
+
 		if cfg.Templates[i].IDEPort == nil {
 			def := 40000
 			cfg.Templates[i].IDEPort = &def
 		}
-	}
 
-	for i := range cfg.Templates {
 		if cfg.Templates[i].EnableIDE == nil {
 			if i == 0 {
 				def := true
@@ -115,9 +128,7 @@ func ParseConfigs(file string) Config {
 				cfg.Templates[i].EnableIDE = &def
 			}
 		}
-	}
 
-	for i := range cfg.Templates {
 		if len(cfg.Templates[i].Network) == 0 {
 			bridge := "br0"
 			ip := "172.16.0." + strconv.Itoa(i+2)

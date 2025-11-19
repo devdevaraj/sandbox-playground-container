@@ -43,6 +43,9 @@ func PopulateIp(cfg init_app.Config) {
 			if *vm.EnableIDE {
 				TARGET_CACHE["codeserverprt"] = *ni.IP + ":" + strconv.Itoa(*vm.IDEPort)
 			}
+			if *vm.EnableGUI {
+				TARGET_CACHE["desktopprt"] = *ni.IP + ":" + strconv.Itoa(*vm.GUIPort)
+			}
 		}
 	}
 }

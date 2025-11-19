@@ -1,18 +1,15 @@
 package wsserver
 
 import (
+	"io"
 	"log"
+	"net"
 	"net/http"
 	"net/http/httputil"
 	"net/url"
 	"strings"
-
-	"github.com/gorilla/websocket"
+	"time"
 )
-
-var upgrader = websocket.Upgrader{
-	CheckOrigin: func(r *http.Request) bool { return true },
-}
 
 type HTTPWSProxy struct {
 	Target string
@@ -34,88 +31,109 @@ func (p *HTTPWSProxy) ProxyHandler(w http.ResponseWriter, r *http.Request) {
 	}
 
 	isWS := strings.Contains(connHdr, "upgrade") && upgradeHdr == "websocket"
-	targetScheme := incomingScheme
-	if isWS {
-		if incomingScheme == "https" {
-			targetScheme = "wss"
-		} else {
-			targetScheme = "ws"
-		}
-	}
-
-	backendHost := p.Target
-	backendURL := &url.URL{
-		Scheme: targetScheme,
-		Host:   backendHost,
-		Path:   r.URL.Path,
-	}
 
 	if isWS {
-		p.ProxyWebSocket(backendURL, w, r)
+		p.ProxyWebSocketRaw(w, r)
 	} else {
+		targetScheme := incomingScheme
+		backendHost := p.Target
+		backendURL := &url.URL{
+			Scheme:   targetScheme,
+			Host:     backendHost,
+			Path:     r.URL.Path,
+			RawQuery: r.URL.RawQuery,
+		}
 		p.ProxyHTTP(backendURL, w, r)
 	}
 }
 
+// ------------------ HTTP PROXY ------------------
 func (p *HTTPWSProxy) ProxyHTTP(target *url.URL, w http.ResponseWriter, r *http.Request) {
 	proxy := httputil.NewSingleHostReverseProxy(target)
+
+	proxy.Transport = &http.Transport{
+		DialContext: (&net.Dialer{
+			Timeout:   30 * time.Second,
+			KeepAlive: 30 * time.Second,
+		}).DialContext,
+		ResponseHeaderTimeout: 1800 * time.Second,
+		ExpectContinueTimeout: 10 * time.Second,
+	}
+
 	proxy.Director = func(req *http.Request) {
 		req.URL.Scheme = target.Scheme
 		req.URL.Host = target.Host
 		req.Host = target.Host
 		req.URL.Path = target.Path
-		req.Header.Set("X-Forwarded-For", "")
-		req.Header.Set("X-Real-IP", "")
+		req.URL.RawQuery = target.RawQuery
+
+		req.Header.Set("X-Real-IP", clientIP(r))
+		req.Header.Set("X-Forwarded-For", r.Header.Get("X-Forwarded-For")+","+clientIP(r))
+		req.Header.Set("X-Forwarded-Proto", getScheme(r))
+		req.Header.Set("Upgrade", r.Header.Get("Upgrade"))
+		req.Header.Set("Connection", "upgrade")
+		req.Header.Set("Host", r.Host)
+
 	}
+	proxy.FlushInterval = 100 * time.Millisecond
 	proxy.ServeHTTP(w, r)
 }
 
-func (p *HTTPWSProxy) ProxyWebSocket(target *url.URL, w http.ResponseWriter, r *http.Request) {
-	clientConn, err := upgrader.Upgrade(w, r, nil)
+// ------------------ WEBSOCKET PROXY ------------------
+func (p *HTTPWSProxy) ProxyWebSocketRaw(w http.ResponseWriter, r *http.Request) {
+	hj, ok := w.(http.Hijacker)
+	if !ok {
+		http.Error(w, "Hijacking not supported", http.StatusInternalServerError)
+		return
+	}
+
+	clientConn, _, err := hj.Hijack()
 	if err != nil {
-		log.Println("Failed to upgrade client websocket:", err)
+		log.Printf("Hijack error: %v", err)
+		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
 	defer clientConn.Close()
 
-	backendConn, _, err := websocket.DefaultDialer.Dial(target.String(), nil)
+	backendConn, err := net.DialTimeout("tcp", p.Target, 30*time.Second)
 	if err != nil {
-		log.Println("Failed to dial backend websocket:", err)
+		log.Printf("Backend dial error: %v", err)
 		return
 	}
 	defer backendConn.Close()
 
+	err = r.Write(backendConn)
+	if err != nil {
+		log.Printf("Error writing request to backend: %v", err)
+		return
+	}
+
 	errc := make(chan error, 2)
 
 	go func() {
-		for {
-			mt, msg, err := clientConn.ReadMessage()
-			if err != nil {
-				errc <- err
-				return
-			}
-			err = backendConn.WriteMessage(mt, msg)
-			if err != nil {
-				errc <- err
-				return
-			}
-		}
+		_, err := io.Copy(backendConn, clientConn)
+		errc <- err
 	}()
 
 	go func() {
-		for {
-			mt, msg, err := backendConn.ReadMessage()
-			if err != nil {
-				errc <- err
-				return
-			}
-			err = clientConn.WriteMessage(mt, msg)
-			if err != nil {
-				errc <- err
-				return
-			}
-		}
+		_, err := io.Copy(clientConn, backendConn)
+		errc <- err
 	}()
 
 	<-errc
+}
+
+func clientIP(r *http.Request) string {
+	ip := r.Header.Get("X-Real-IP")
+	if ip == "" {
+		ip, _, _ = net.SplitHostPort(r.RemoteAddr)
+	}
+	return ip
+}
+
+func getScheme(r *http.Request) string {
+	if r.TLS != nil {
+		return "https"
+	}
+	return "http"
 }
