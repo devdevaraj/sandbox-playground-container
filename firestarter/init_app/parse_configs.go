@@ -24,6 +24,12 @@ type Network struct {
 	Nameservers Nameservers `json:"nameservers"`
 }
 
+type Disk struct {
+	Name       string `json:"name,omitempty"`
+	Size       int    `json:"size,omitempty"`
+	IsReadOnly bool   `json:"is-read-only,omitempty"`
+}
+
 type Template struct {
 	CPU           *int      `json:"cpu,omitempty"`
 	SMT           *bool     `json:"smt,omitempty"`
@@ -42,6 +48,7 @@ type Template struct {
 	GUIPort       *int      `json:"gui-port"`
 	EnableIDE     *bool     `json:"enable-ide"`
 	IDEPort       *int      `json:"ide-port"`
+	Disks         []Disk    `json:"disks"`
 	Network       []Network `json:"network"`
 }
 

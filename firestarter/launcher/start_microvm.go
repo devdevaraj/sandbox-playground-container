@@ -7,6 +7,7 @@ import (
 	"net"
 	"os"
 	"path/filepath"
+	"strconv"
 	"strings"
 
 	"github.com/devdevaraj/firestarter/init_app"
@@ -17,6 +18,7 @@ import (
 func StartMicroVM(
 	ctx context.Context,
 	vmID string,
+	disks []init_app.Disk,
 	network []init_app.Network,
 	kernelArgs string,
 	kernelImagePath string,
@@ -30,6 +32,7 @@ func StartMicroVM(
 ) (*firecracker.Machine, error) {
 	// Configure VM
 	overlayfsPath := "/root/firecracker/overlayfs/" + vmID + "-overlay.ext4"
+	diskPath := "/root/firecracker/disks-" + vmID + "/"
 	socketPath := fmt.Sprintf("/tmp/firecracker-%s.sock", vmID)
 
 	// Check if socket exists and remove it
@@ -132,6 +135,16 @@ func StartMicroVM(
 					IsReadOnly:   firecracker.Bool(overlay),
 					RateLimiter:  nil,
 				},
+			}
+			for i, disk := range disks {
+				drives = append(drives, models.Drive{
+					DriveID:      firecracker.String(disk.Name),
+					PathOnHost:   firecracker.String(diskPath + "disk" + strconv.Itoa(i+1) + ".ext4"),
+					CacheType:    firecracker.String(models.DriveCacheTypeUnsafe),
+					IsRootDevice: firecracker.Bool(false),
+					IsReadOnly:   firecracker.Bool(disk.IsReadOnly),
+					RateLimiter:  nil,
+				})
 			}
 			if overlay {
 				drives = append(drives, models.Drive{

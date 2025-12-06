@@ -15,6 +15,7 @@ func Launcher(cfg init_app.Config, ctx context.Context, args []string) {
 			StartMicroVM(
 				ctx,
 				"vm"+strconv.Itoa(i+1),
+				cfg.Templates[i].Disks,
 				cfg.Templates[i].Network,
 				cfg.Templates[i].KernelArgs,
 				cfg.Templates[i].Kernel,
