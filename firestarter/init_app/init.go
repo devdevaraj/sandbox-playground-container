@@ -8,7 +8,7 @@ import (
 )
 
 func Init() (*Config, []string) {
-	jsonStr := os.Getenv("CONFIG_JSON")
+	jsonStr := os.Getenv("PG_CONFIG")
 	log.Printf("%s", jsonStr)
 	args := os.Args
 	cfg := ParseConfigs(args[1])
