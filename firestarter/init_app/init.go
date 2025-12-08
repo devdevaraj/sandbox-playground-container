@@ -10,7 +10,7 @@ import (
 func Init() (*Config, []string) {
 	jsonStr := os.Getenv("PG_CONFIG")
 	args := os.Args
-	cfg := ParseConfigs(args[1], jsonStr)
+	cfg := ParseConfigs(jsonStr)
 
 	fsDir := "/root/firecracker/overlayfs"
 	err := os.MkdirAll(fsDir, 0755)

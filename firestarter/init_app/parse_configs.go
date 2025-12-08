@@ -3,7 +3,6 @@ package init_app
 import (
 	"encoding/json"
 	"log"
-	"os"
 	"strconv"
 )
 
@@ -66,17 +65,9 @@ type Config struct {
 	Templates []Template `json:"templates"`
 }
 
-func ParseConfigs(file string, configString string) Config {
-	data, err := os.ReadFile("/resourses/.configs/" + file + ".json")
-	if err != nil {
-		log.Fatalf("Failed to read file: %v", err)
-	}
-
-	var cfg, cfgNew Config
-	if err := json.Unmarshal(data, &cfg); err != nil {
-		log.Fatalf("Failed to unmarshal data: %v", err)
-	}
-	if err := json.Unmarshal([]byte(configString), &cfgNew); err != nil {
+func ParseConfigs(configString string) Config {
+	var cfg Config
+	if err := json.Unmarshal([]byte(configString), &cfg); err != nil {
 		log.Fatalf("Failed to unmarshal data: %v", err)
 	}
 
@@ -163,6 +154,5 @@ func ParseConfigs(file string, configString string) Config {
 
 	}
 	PrintConfig(cfg)
-	PrintConfig(cfgNew)
-	return cfgNew
+	return cfg
 }
