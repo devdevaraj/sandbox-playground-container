@@ -16,7 +16,7 @@ RUN apt-get update && apt-get install -y \
     procps \
     ca-certificates \
     # git \
-    build-essential \
+    # build-essential \
     python3 \
     python3-pip \
     && apt-get clean \
@@ -43,4 +43,4 @@ COPY ./firestarter/firestarter /root/firecracker/firestarter
 WORKDIR /root/firecracker
 
 ENTRYPOINT ["/root/firecracker/firestarter"]
-CMD ["ubuntu2404n1"]
+# CMD ["ubuntu2404n1"]
