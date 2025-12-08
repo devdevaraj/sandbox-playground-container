@@ -61,18 +61,22 @@ type Bridges struct {
 }
 
 type Config struct {
+	ID        string     `json:"id"`
 	Bridges   []Bridges  `json:"bridges"`
 	Templates []Template `json:"templates"`
 }
 
-func ParseConfigs(file string) Config {
+func ParseConfigs(file string, configString string) Config {
 	data, err := os.ReadFile("/resourses/.configs/" + file + ".json")
 	if err != nil {
 		log.Fatalf("Failed to read file: %v", err)
 	}
 
-	var cfg Config
+	var cfg, cfgNew Config
 	if err := json.Unmarshal(data, &cfg); err != nil {
+		log.Fatalf("Failed to unmarshal data: %v", err)
+	}
+	if err := json.Unmarshal(data, &cfgNew); err != nil {
 		log.Fatalf("Failed to unmarshal data: %v", err)
 	}
 
@@ -159,5 +163,6 @@ func ParseConfigs(file string) Config {
 
 	}
 	PrintConfig(cfg)
+	PrintConfig(cfgNew)
 	return cfg
 }
