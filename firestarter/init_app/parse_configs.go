@@ -76,7 +76,7 @@ func ParseConfigs(file string, configString string) Config {
 	if err := json.Unmarshal(data, &cfg); err != nil {
 		log.Fatalf("Failed to unmarshal data: %v", err)
 	}
-	if err := json.Unmarshal(data, &cfgNew); err != nil {
+	if err := json.Unmarshal([]byte(configString), &cfgNew); err != nil {
 		log.Fatalf("Failed to unmarshal data: %v", err)
 	}
 
