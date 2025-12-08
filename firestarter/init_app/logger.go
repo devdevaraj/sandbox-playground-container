@@ -45,6 +45,8 @@ func PrintConfig(c Config) {
 		printIndent("    Username:      ", formatPtr(tmpl.Username))
 		printIndent("    EnableIDE:     ", formatPtr(tmpl.EnableIDE))
 		printIndent("    IDEPort:       ", formatPtr(tmpl.IDEPort))
+		printIndent("    EnableGUI:     ", formatPtr(tmpl.EnableGUI))
+		printIndent("    GUIPort:       ", formatPtr(tmpl.GUIPort))
 
 		for ni, net := range tmpl.Network {
 			printIndent(fmt.Sprintf("    Network #%d:", ni), "")
