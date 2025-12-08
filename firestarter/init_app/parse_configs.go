@@ -164,5 +164,5 @@ func ParseConfigs(file string, configString string) Config {
 	}
 	PrintConfig(cfg)
 	PrintConfig(cfgNew)
-	return cfg
+	return cfgNew
 }
