@@ -7,16 +7,15 @@ import (
 	"strconv"
 )
 
-func Init() (*Config, []string) {
+func Init() *Config {
 	jsonStr := os.Getenv("PG_CONFIG")
-	args := os.Args
 	cfg := ParseConfigs(jsonStr)
 
 	fsDir := "/root/firecracker/overlayfs"
 	err := os.MkdirAll(fsDir, 0755)
 	if err != nil {
 		fmt.Println("Error creating directory:", err)
-		return nil, nil
+		return nil
 	}
 
 	for i, v := range cfg.Templates {
@@ -30,7 +29,7 @@ func Init() (*Config, []string) {
 		err = os.MkdirAll(diskDir, 0755)
 		if err != nil {
 			fmt.Println("Error creating directory:", err)
-			return nil, nil
+			return nil
 		}
 
 		for j, w := range v.Disks {
@@ -40,5 +39,5 @@ func Init() (*Config, []string) {
 		}
 	}
 
-	return &cfg, args
+	return &cfg
 }

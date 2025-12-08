@@ -61,6 +61,7 @@ type Bridges struct {
 
 type Config struct {
 	ID        string     `json:"id"`
+	Name      string     `json:"name"`
 	Bridges   []Bridges  `json:"bridges"`
 	Templates []Template `json:"templates"`
 }

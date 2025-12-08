@@ -16,7 +16,7 @@ func main() {
 	ctx, cancel := context.WithCancel(context.Background())
 	defer cancel()
 
-	cfg, args := init_app.Init()
+	cfg := init_app.Init()
 
 	go func() {}()
 
@@ -28,6 +28,6 @@ func main() {
 		httpproxy.HTTPProxy(HTTPPort)
 	}()
 
-	launcher.Launcher(*cfg, ctx, args)
+	launcher.Launcher(*cfg, ctx)
 	select {}
 }

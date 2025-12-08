@@ -8,7 +8,7 @@ import (
 	"github.com/devdevaraj/firestarter/init_app"
 )
 
-func Launcher(cfg init_app.Config, ctx context.Context, args []string) {
+func Launcher(cfg init_app.Config, ctx context.Context) {
 	ConfigureNetWork(cfg)
 	for i := range len(cfg.Templates) {
 		go func() {
@@ -25,7 +25,7 @@ func Launcher(cfg init_app.Config, ctx context.Context, args []string) {
 				cfg.Templates[i].RAM,
 				cfg.Templates[i].EnableOverlay,
 				cfg.Templates[i].IsZFS,
-				"/"+cfg.Templates[i].ZFSClonePath+"/"+args[1]+"-vm"+strconv.Itoa(i+1)+"/rootfs.ext4",
+				"/"+cfg.Templates[i].ZFSClonePath+"/"+cfg.Name+"-vm"+strconv.Itoa(i+1)+"/rootfs.ext4",
 			)
 			log.Printf("After starting VM")
 		}()
