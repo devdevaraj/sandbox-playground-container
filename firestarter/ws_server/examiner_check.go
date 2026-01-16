@@ -8,10 +8,15 @@ import (
 	"github.com/gorilla/mux"
 )
 
-func isRequestSuccessful(url string) bool {
+type TestRequest struct {
+	Test string `json:"test"`
+	Args string `json:"args"`
+}
+
+func isRequestSuccessful(url string, test string, args string) bool {
 	data := map[string]string{
-		"username": "johndoe",
-		"password": "secret",
+		"test": test,
+		"args": args,
 	}
 	jsonData, err := json.Marshal(data)
 	if err != nil {
@@ -26,10 +31,19 @@ func isRequestSuccessful(url string) bool {
 }
 
 func ExaminerCheck(w http.ResponseWriter, r *http.Request) {
+	var testRequest TestRequest
+	err := json.NewDecoder(r.Body).Decode(&testRequest)
+	if err != nil {
+		w.WriteHeader(http.StatusBadRequest)
+		json.NewEncoder(w).Encode(TestResponse{
+			Success: false,
+			Error:   "Invalid request",
+			Message: "Test failed",
+		})
+		return
+	}
 	vars := mux.Vars(r)
 	vm := vars["vm"]
-	test := vars["test"]
-	query := r.URL.Query().Get("args")
 
 	ip, exist := VM_MAP[vm]
 
@@ -43,7 +57,7 @@ func ExaminerCheck(w http.ResponseWriter, r *http.Request) {
 		})
 		return
 	}
-	success := isRequestSuccessful("http://" + ip + ":56678/examiner/test/" + test + "?args=" + query)
+	success := isRequestSuccessful("http://"+ip+":56678/examiner/test/test", testRequest.Test, testRequest.Args)
 	w.WriteHeader(http.StatusOK)
 	if success {
 		json.NewEncoder(w).Encode(TestResponse{
