@@ -116,11 +116,15 @@ func HandleWebsocket(w http.ResponseWriter, r *http.Request, ip string, VMID str
 	}
 	defer ws.Close()
 
+	var wsWriteMutex sync.Mutex
+
 	// Read SSH private key
 	privateKeyBytes, err := os.ReadFile("/root/firecracker/keys/ubuntu-24.04.id_rsa")
 	if err != nil {
 		log.Printf("Failed to read private key: %v", err)
+		wsWriteMutex.Lock()
 		ws.WriteMessage(websocket.TextMessage, []byte(fmt.Sprintf("Failed to read private key: %v", err)))
+		wsWriteMutex.Unlock()
 		return
 	}
 
@@ -128,7 +132,9 @@ func HandleWebsocket(w http.ResponseWriter, r *http.Request, ip string, VMID str
 	signer, err := ssh.ParsePrivateKey(privateKeyBytes)
 	if err != nil {
 		log.Printf("Failed to parse private key: %v", err)
+		wsWriteMutex.Lock()
 		ws.WriteMessage(websocket.TextMessage, []byte(fmt.Sprintf("Failed to parse private key: %v", err)))
+		wsWriteMutex.Unlock()
 		return
 	}
 
@@ -143,7 +149,9 @@ func HandleWebsocket(w http.ResponseWriter, r *http.Request, ip string, VMID str
 
 	wsSess, err := fetchOrCreateSession(sessionid, ip, config)
 	if err != nil {
+		wsWriteMutex.Lock()
 		ws.WriteMessage(websocket.TextMessage, []byte(err.Error()))
+		wsWriteMutex.Unlock()
 		return
 	}
 
@@ -159,9 +167,11 @@ func HandleWebsocket(w http.ResponseWriter, r *http.Request, ip string, VMID str
 
 			var pingMessage PingMessage
 			if err := json.Unmarshal(msg, &pingMessage); err == nil && pingMessage.Type == "ping" {
+				wsWriteMutex.Lock()
 				if err := ws.WriteMessage(websocket.TextMessage, []byte(`{"type":"pong"}`)); err != nil {
 					log.Printf("Failed to resize PTY: %v", err)
 				}
+				wsWriteMutex.Unlock()
 				continue
 			}
 
@@ -191,10 +201,13 @@ func HandleWebsocket(w http.ResponseWriter, r *http.Request, ip string, VMID str
 				ws.Close()
 				return
 			}
+			wsWriteMutex.Lock()
 			if err := ws.WriteMessage(websocket.TextMessage, buffer[:n]); err != nil {
 				log.Printf("WebSocket write error: %v", err)
+				wsWriteMutex.Unlock()
 				return
 			}
+			wsWriteMutex.Unlock()
 		}
 	}()
 
@@ -208,10 +221,13 @@ func HandleWebsocket(w http.ResponseWriter, r *http.Request, ip string, VMID str
 				return
 			}
 			message := fmt.Sprintf("STDERR: %s", buffer[:n])
+			wsWriteMutex.Lock()
 			if err := ws.WriteMessage(websocket.TextMessage, []byte(message)); err != nil {
 				log.Printf("WebSocket write error: %v", err)
+				wsWriteMutex.Unlock()
 				return
 			}
+			wsWriteMutex.Unlock()
 		}
 	}()
 
