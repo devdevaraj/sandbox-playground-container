@@ -11,8 +11,8 @@ import (
 func Launcher(cfg init_app.Config, ctx context.Context) {
 	ConfigureNetWork(cfg)
 	for i := range len(cfg.Templates) {
-		go func() {
-			StartMicroVM(
+		go func(i int) {
+			if err := StartMicroVM(
 				ctx,
 				"vm"+strconv.Itoa(i+1),
 				cfg.Templates[i].Disks,
@@ -26,8 +26,10 @@ func Launcher(cfg init_app.Config, ctx context.Context) {
 				cfg.Templates[i].EnableOverlay,
 				cfg.Templates[i].IsZFS,
 				"/"+cfg.Templates[i].ZFSClonePath+"/"+cfg.Name+"-vm"+strconv.Itoa(i+1)+"/rootfs.ext4",
-			)
+			); err != nil {
+				log.Printf("Error starting VM %d: %v", i+1, err)
+			}
 			log.Printf("After starting VM")
-		}()
+		}(i)
 	}
 }
