@@ -110,11 +110,20 @@ func StartMicroVM(
 	// Machine Config
 	machineCfg := MachineConfiguration{
 		VcpuCount:  int64(cpuCount),
-		MemSizeMib: int64(ramSize),
+		MemSizeMib: int64(512),
 		Smt:        smtFlag,
 	}
 	if err := client.PutMachineConfiguration(ctx, machineCfg); err != nil {
 		return fmt.Errorf("failed to set machine config: %w", err)
+	}
+
+	// Hotplug Config needs to be done *before* InstanceStart, ideally before anything is running.
+	log.Println("Configuring Memory Hotplug for VM Instance...")
+	memHotplugCfg := MemoryHotplugConfig{
+		TotalSizeMib: int(ramSize - 512), // This is the *additional* memory capacity that can be hotplugged
+	}
+	if err := client.PutMemoryHotplug(ctx, memHotplugCfg); err != nil {
+		log.Printf("Warning: Failed to setup memory hotplug: %v", err)
 	}
 
 	// Boot Source
@@ -127,6 +136,9 @@ func StartMicroVM(
 		&kernelArgStr,
 		"console=ttyS0 reboot=k panic=1 pci=off hostname="+vmID+" overlay_root=vdb init=/sbin/overlay-init ip=172.16.0.2::172.16.0.1:255.255.255.0::eth0:off",
 	)
+
+	// Append virtio-mem required kernel args
+	finalKernelArgs += " memhp_default_state=online_movable"
 
 	bootSource := BootSource{
 		KernelImagePath: kernelImagePath,
@@ -218,6 +230,13 @@ func StartMicroVM(
 			log.Printf("Firecracker process for %s exited cleanly", vmID)
 		}
 	}()
+
+	// Start Memory Balancer to dynamically hotplug memory using virtio-mem
+	vmIP := ""
+	if primeryNetwork != nil && primeryNetwork.IP != nil {
+		vmIP = *primeryNetwork.IP
+	}
+	StartMemoryAutoscaler(ctx, client, vmID, vmIP)
 
 	return nil
 }

@@ -9,6 +9,7 @@ RUN apt-get update && apt-get install -y \
     wget \
     tar \
     # jq \
+    ssh \
     iptables \
     dnsmasq \
     bridge-utils \
@@ -22,13 +23,13 @@ RUN apt-get update && apt-get install -y \
     && apt-get clean \
     && rm -rf /var/lib/apt/lists/*
 
-RUN wget https://github.com/firecracker-microvm/firecracker/releases/download/v1.11.0/firecracker-v1.11.0-x86_64.tgz
-RUN tar -xf  firecracker-v1.11.0-x86_64.tgz
+RUN wget https://github.com/firecracker-microvm/firecracker/releases/download/v1.14.1/firecracker-v1.14.1-x86_64.tgz
+RUN tar -xf  firecracker-v1.14.1-x86_64.tgz
 
-RUN mv release-v1.11.0-x86_64/firecracker-v1.11.0-x86_64 /usr/local/bin/firecracker \
+RUN mv release-v1.14.1-x86_64/firecracker-v1.14.1-x86_64 /usr/local/bin/firecracker \
     && chmod +x /usr/local/bin/firecracker
 
-RUN mv release-v1.11.0-x86_64/jailer-v1.11.0-x86_64 /usr/local/bin/jailer \
+RUN mv release-v1.14.1-x86_64/jailer-v1.14.1-x86_64 /usr/local/bin/jailer \
     && chmod +x /usr/local/bin/jailer
 
 RUN mkdir -p /dev/netdev

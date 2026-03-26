@@ -5,6 +5,7 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
+	"log"
 	"net"
 	"net/http"
 )
@@ -69,6 +70,25 @@ type InstanceAction struct {
 	ActionType string `json:"action_type"`
 }
 
+// MemoryHotplugConfig is the configuration for virtio-mem device (PUT /hotplug/memory before boot)
+type MemoryHotplugConfig struct {
+	TotalSizeMib int `json:"total_size_mib"`
+}
+
+// MemoryHotplugStatus is the response from GET /hotplug/memory
+type MemoryHotplugStatus struct {
+	TotalSizeMib     int `json:"total_size_mib"`
+	BlockSizeMib     int `json:"block_size_mib"`
+	SlotSizeMib      int `json:"slot_size_mib"`
+	PluggedSizeMib   int `json:"plugged_size_mib"`
+	RequestedSizeMib int `json:"requested_size_mib"`
+}
+
+// MemoryHotplugRequest is used to adjust memory at runtime (PATCH /hotplug/memory)
+type MemoryHotplugRequest struct {
+	RequestedSizeMib int `json:"requested_size_mib"`
+}
+
 // makeRequest acts as a helper to make HTTP requests to the unix socket
 func (c *FirecrackerClient) makeRequest(ctx context.Context, method, endpoint string, payload interface{}) error {
 	var body bytes.Buffer
@@ -90,6 +110,7 @@ func (c *FirecrackerClient) makeRequest(ctx context.Context, method, endpoint st
 	req.Header.Set("Accept", "application/json")
 
 	resp, err := c.httpClient.Do(req)
+	log.Printf("Response: %v", resp)
 	if err != nil {
 		return fmt.Errorf("request failed: %w", err)
 	}
@@ -133,4 +154,40 @@ func (c *FirecrackerClient) InstanceStart(ctx context.Context) error {
 		ActionType: "InstanceStart",
 	}
 	return c.makeRequest(ctx, http.MethodPut, "/actions", action)
+}
+
+func (c *FirecrackerClient) PutMemoryHotplug(ctx context.Context, config MemoryHotplugConfig) error {
+	return c.makeRequest(ctx, http.MethodPut, "/hotplug/memory", config)
+}
+
+func (c *FirecrackerClient) GetMemoryHotplugStatus(ctx context.Context) (*MemoryHotplugStatus, error) {
+	req, err := http.NewRequestWithContext(ctx, http.MethodGet, "http://localhost/hotplug/memory", nil)
+	if err != nil {
+		return nil, fmt.Errorf("failed to create request: %w", err)
+	}
+
+	req.Header.Set("Accept", "application/json")
+
+	resp, err := c.httpClient.Do(req)
+	if err != nil {
+		return nil, fmt.Errorf("request failed: %w", err)
+	}
+	defer resp.Body.Close()
+
+	if resp.StatusCode >= 400 {
+		var errBody bytes.Buffer
+		_, _ = errBody.ReadFrom(resp.Body)
+		return nil, fmt.Errorf("API error %d: %s", resp.StatusCode, errBody.String())
+	}
+
+	var status MemoryHotplugStatus
+	if err := json.NewDecoder(resp.Body).Decode(&status); err != nil {
+		return nil, fmt.Errorf("failed to decode response: %w", err)
+	}
+
+	return &status, nil
+}
+
+func (c *FirecrackerClient) PatchMemoryHotplug(ctx context.Context, request MemoryHotplugRequest) error {
+	return c.makeRequest(ctx, http.MethodPatch, "/hotplug/memory", request)
 }
